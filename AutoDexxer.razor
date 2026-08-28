@@ -1,0 +1,122 @@
+@setvar! jaseowns_BandageTimerCD 20000
+if not timerexists jaseowns_BandageTimer
+    settimer jaseowns_BandageTimer jaseowns_BandageTimerCD
+endif
+
+@setvar! goldAmountToDrop 1000
+
+@setvar! jaseowns_UseAbilityTimerCD 5000
+@setvar! jaseowns_UseAbility1 1
+@setvar! jaseowns_UseAbility2 0
+@setvar! jaseowns_UseAbility3 0
+
+if not timerexists jaseowns_UseAbility1Timer
+    settimer jaseowns_UseAbility1Timer 30000
+endif
+
+if not timerexists jaseowns_UseAbility2Timer
+    settimer jaseowns_UseAbility2Timer 30000
+endif
+
+if not timerexists jaseowns_UseAbility3Timer
+    settimer jaseowns_UseAbility3Timer 30000
+endif
+
+if findtype 8454|8455|43206|5363 self
+    while not targetexists 
+        overhead "You have valuable shit on you! Open target cursor to continue anyway stupidly" 17
+        sysmsg  "You have valuable shit on you! Open target cursor to continue anyway stupidly" 17
+        wait 500
+    endwhile
+endif 
+
+while not dead
+    if paralyzed 
+        if findtype "pouch" backpack 38 as item
+            yell "[pouch"
+        else
+            overhead "Out of pouches!" 34
+        endif
+    endif
+    
+    if weight > maxweight
+        if findtype "gold coin" backpack as item
+            lift item goldAmountToDrop
+            droprelloc 0 0
+            wait 200
+            if insysmsg "cannot drop anything"
+                drop backpack -1 -1 -1
+            endif
+            wait 650
+            replay
+        else
+            overhead "We are overweight but cannot drop anything" 34
+        endif
+    endif
+    
+
+    // Handle manual bandage
+    while insysmsg "You begin applying"
+        overhead "Bandage was started" 69
+        sysmsg "Bandage was started" 69
+        settimer jaseowns_BandageTimer 0
+    endwhile
+
+    // Reset the timer if we finished
+    while insysmsg "You finish applying" or insysmsg "You heal what little" or insysmsg "barely help" or insysmsg "You fail to resurrect" or insysmsg "You are able to resurrect"
+        overhead "Bandage has finished" 69
+        sysmsg "Bandage has finished" 69
+        settimer jaseowns_BandageTimer jaseowns_BandageTimerCD
+    endwhile
+
+    if timer jaseowns_BandageTimer >= jaseowns_BandageTimerCD
+        if hp < maxhp or poisoned or findbuff "disease" or findbuff "bleed"
+            hotkey "Bandage Self"
+            getlabel backpack jaseowns_PingCheck
+            if insysmsg "You begin applying"
+                overhead "Bandage was started" 69
+                sysmsg "Bandage was started" 69
+                settimer jaseowns_BandageTimer 0
+            endif
+        endif
+    endif
+    
+    if jaseowns_UseAbility1 = 1 and timer jaseowns_UseAbility1Timer >= jaseowns_UseAbilityTimerCD
+        say "[WeaponAbility1"
+        getlabel backpack jaseowns_PingCheck 
+        if insysmsg "You do cannot perform that ability yet."
+            settimer jaseowns_UseAbility1Timer 0
+        elseif insysmsg "You have not yet unlocked that weapon ability."
+            @setvar! jaseowns_UseAbility1 0
+        else
+            settimer jaseowns_UseAbility1Timer 0 
+        endif
+    endif 
+
+    if jaseowns_UseAbility2 = 1 and timer jaseowns_UseAbility2Timer >= jaseowns_UseAbilityTimerCD
+        say "[WeaponAbility2"
+        getlabel backpack jaseowns_PingCheck 
+        if insysmsg "You do cannot perform that ability yet."
+            settimer jaseowns_UseAbility2Timer 0
+        elseif insysmsg "You have not yet unlocked that weapon ability."
+            @setvar! jaseowns_UseAbility2 0
+        else
+            settimer jaseowns_UseAbility2Timer 0 
+        endif
+    endif   
+    
+    if jaseowns_UseAbility3 = 1 and timer jaseowns_UseAbility3Timer >= jaseowns_UseAbilityTimerCD
+        say "[WeaponAbility3"
+        getlabel backpack jaseowns_PingCheck 
+        if insysmsg "You do cannot perform that ability yet."
+            settimer jaseowns_UseAbility3Timer 0
+        elseif insysmsg "You have not yet unlocked that weapon ability."
+            @setvar! jaseowns_UseAbility3 0
+        else
+            settimer jaseowns_UseAbility3Timer 0 
+        endif
+    endif   
+    
+    wait 50
+
+endwhile
