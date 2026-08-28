@@ -241,10 +241,15 @@ while findtype 31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_Staff_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_Staff_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -334,10 +339,15 @@ while findtype "dual wield tracker knife|duel wield katana|dual wield norse axe|
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_DualWeild_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_DualWeild_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -426,10 +436,15 @@ while findtype "chakram|francisca|hurlbat|javelin|throwing knife|throwing star|6
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_Throwing_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_Throwing_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -519,10 +534,15 @@ while findtype 3909|3911|3913|3915|3917|3934|3937|5046|5049|5115|5119|5182|5185|
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_Swords_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_Swords_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -613,10 +633,15 @@ while findtype 3568|3713|3721|3932|5040|5044|5112|5127|5177|5179|5181|30991|3099
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_Macing_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_Macing_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -709,10 +734,15 @@ while findtype 31172|31169|3719|3922|3938|5121|5123|5125|30989|30992|30996|30997
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_Fencing_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_Fencing_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -805,10 +835,15 @@ while findtype 3920|5042|5117|30990|30993|30994|30995|31184|31186 messySourceCon
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_Archery_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_Archery_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -881,10 +916,15 @@ while findtype 7026|7027|7029|7031|7033|7034|7035|7107|7109|31002|31130 messySou
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_Shield_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_Shield_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -977,10 +1017,15 @@ while findtype 3570|3571|3572|3573|3834 messySourceContainer as item
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_Mage_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_Mage_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -1073,10 +1118,15 @@ while findtype 22187|31141|31142 messySourceContainer as item
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_Wrestling_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_Wrestling_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -1169,10 +1219,15 @@ while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 mes
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        lift item
-        drop jase_Music_Storage 0 0 0
-        wait 650
-        @ignore item
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            lift item
+            drop jase_Music_Storage 0 0 0
+            wait 650
+            @ignore item
+        endif
     endif
 
     if recycleItem = 1
@@ -1243,26 +1298,31 @@ while findtype 5061|5063|5070|5074|5075|7169|7175|7177|7179|7610|31191 messySour
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        if "plate" in desc
-            @setvar! saveItem jase_Plate_Storage
-        elseif "chain" in desc
-            @setvar! saveItem jase_Chainmail_Storage
-        elseif "ring" in desc
-            @setvar! saveItem jase_Ringmail_Storage
-        elseif "bone" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "studded" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "leather" in desc
-            @setvar! saveItem jase_RegularLeather_Storage
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            if "plate" in desc
+                @setvar! saveItem jase_Plate_Storage
+            elseif "chain" in desc
+                @setvar! saveItem jase_Chainmail_Storage
+            elseif "ring" in desc
+                @setvar! saveItem jase_Ringmail_Storage
+            elseif "bone" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "studded" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "leather" in desc
+                @setvar! saveItem jase_RegularLeather_Storage
+            endif
+            if saveItem = 1 or saveItem = 0
+                overhead "Unknown save location for {{desc}}" 34
+            endif
+            lift item
+            drop saveItem 0 0 0
+            wait globalTimeout
+            @ignore item
         endif
-        if saveItem = 1 or saveItem = 0
-            overhead "Unknown save location for {{desc}}" 34
-        endif
-        lift item
-        drop saveItem 0 0 0
-        wait globalTimeout
-        @ignore item
     endif
 
     if recycleItem = 1
@@ -1332,26 +1392,31 @@ while findtype 5078|5201|5203|5204|5205|5207|7177|31003|31004 messySourceContain
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        if "plate" in desc
-            @setvar! saveItem jase_Plate_Storage
-        elseif "chain" in desc
-            @setvar! saveItem jase_Chainmail_Storage
-        elseif "ring" in desc
-            @setvar! saveItem jase_Ringmail_Storage
-        elseif "bone" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "studded" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "leather" in desc
-            @setvar! saveItem jase_RegularLeather_Storage
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            if "plate" in desc
+                @setvar! saveItem jase_Plate_Storage
+            elseif "chain" in desc
+                @setvar! saveItem jase_Chainmail_Storage
+            elseif "ring" in desc
+                @setvar! saveItem jase_Ringmail_Storage
+            elseif "bone" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "studded" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "leather" in desc
+                @setvar! saveItem jase_RegularLeather_Storage
+            endif
+            if saveItem = 1 or saveItem = 0
+                overhead "Unknown save location for {{desc}}" 34
+            endif
+            lift item
+            drop saveItem 0 0 0
+            wait globalTimeout
+            @ignore item
         endif
-        if saveItem = 1 or saveItem = 0
-            overhead "Unknown save location for {{desc}}" 34
-        endif
-        lift item
-        drop saveItem 0 0 0
-        wait globalTimeout
-        @ignore item
     endif
 
     if recycleItem = 1
@@ -1420,26 +1485,31 @@ while findtype 5076|5078|5085|5089|5090|7170|7177|7181|7610|31011|31012 messySou
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        if "plate" in desc
-            @setvar! saveItem jase_Plate_Storage
-        elseif "chain" in desc
-            @setvar! saveItem jase_Chainmail_Storage
-        elseif "ring" in desc
-            @setvar! saveItem jase_Ringmail_Storage
-        elseif "bone" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "studded" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "leather" in desc
-            @setvar! saveItem jase_RegularLeather_Storage
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            if "plate" in desc
+                @setvar! saveItem jase_Plate_Storage
+            elseif "chain" in desc
+                @setvar! saveItem jase_Chainmail_Storage
+            elseif "ring" in desc
+                @setvar! saveItem jase_Ringmail_Storage
+            elseif "bone" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "studded" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "leather" in desc
+                @setvar! saveItem jase_RegularLeather_Storage
+            endif
+            if saveItem = 1 or saveItem = 0
+                overhead "Unknown save location for {{desc}}" 34
+            endif
+            lift item
+            drop saveItem 0 0 0
+            wait globalTimeout
+            @ignore item
         endif
-        if saveItem = 1 or saveItem = 0
-            overhead "Unknown save location for {{desc}}" 34
-        endif
-        lift item
-        drop saveItem 0 0 0
-        wait globalTimeout
-        @ignore item
     endif
 
     if recycleItem = 1
@@ -1508,26 +1578,31 @@ while findtype 5078|5101|5103|5105|5106|5131|7177|7947|31009|31010 messySourceCo
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        if "plate" in desc
-            @setvar! saveItem jase_Plate_Storage
-        elseif "chain" in desc
-            @setvar! saveItem jase_Chainmail_Storage
-        elseif "ring" in desc
-            @setvar! saveItem jase_Ringmail_Storage
-        elseif "bone" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "studded" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "leather" in desc
-            @setvar! saveItem jase_RegularLeather_Storage
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            if "plate" in desc
+                @setvar! saveItem jase_Plate_Storage
+            elseif "chain" in desc
+                @setvar! saveItem jase_Chainmail_Storage
+            elseif "ring" in desc
+                @setvar! saveItem jase_Ringmail_Storage
+            elseif "bone" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "studded" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "leather" in desc
+                @setvar! saveItem jase_RegularLeather_Storage
+            endif
+            if saveItem = 1 or saveItem = 0
+                overhead "Unknown save location for {{desc}}" 34
+            endif
+            lift item
+            drop saveItem 0 0 0
+            wait globalTimeout
+            @ignore item
         endif
-        if saveItem = 1 or saveItem = 0
-            overhead "Unknown save location for {{desc}}" 34
-        endif
-        lift item
-        drop saveItem 0 0 0
-        wait globalTimeout
-        @ignore item
     endif
 
     if recycleItem = 1
@@ -1597,26 +1672,31 @@ while findtype 5056|5059|5060|5063|5103|5106|7177|31005|31006|31007|31015 messyS
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        if "plate" in desc
-            @setvar! saveItem jase_Plate_Storage
-        elseif "chain" in desc
-            @setvar! saveItem jase_Chainmail_Storage
-        elseif "ring" in desc
-            @setvar! saveItem jase_Ringmail_Storage
-        elseif "bone" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "studded" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "leather" in desc
-            @setvar! saveItem jase_RegularLeather_Storage
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            if "plate" in desc
+                @setvar! saveItem jase_Plate_Storage
+            elseif "chain" in desc
+                @setvar! saveItem jase_Chainmail_Storage
+            elseif "ring" in desc
+                @setvar! saveItem jase_Ringmail_Storage
+            elseif "bone" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "studded" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "leather" in desc
+                @setvar! saveItem jase_RegularLeather_Storage
+            endif
+            if saveItem = 1 or saveItem = 0
+                overhead "Unknown save location for {{desc}}" 34
+            endif
+            lift item
+            drop saveItem 0 0 0
+            wait globalTimeout
+            @ignore item
         endif
-        if saveItem = 1 or saveItem = 0
-            overhead "Unknown save location for {{desc}}" 34
-        endif
-        lift item
-        drop saveItem 0 0 0
-        wait globalTimeout
-        @ignore item
     endif
 
     if recycleItem = 1
@@ -1685,26 +1765,31 @@ while findtype 5129|5132|5135|5138|5139|5142|5143|5144|5146|7173|7177|31008 mess
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        if "plate" in desc
-            @setvar! saveItem jase_Plate_Storage
-        elseif "chain" in desc
-            @setvar! saveItem jase_Chainmail_Storage
-        elseif "ring" in desc
-            @setvar! saveItem jase_Ringmail_Storage
-        elseif "bone" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "studded" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "leather" in desc
-            @setvar! saveItem jase_RegularLeather_Storage
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            if "plate" in desc
+                @setvar! saveItem jase_Plate_Storage
+            elseif "chain" in desc
+                @setvar! saveItem jase_Chainmail_Storage
+            elseif "ring" in desc
+                @setvar! saveItem jase_Ringmail_Storage
+            elseif "bone" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "studded" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "leather" in desc
+                @setvar! saveItem jase_RegularLeather_Storage
+            endif
+            if saveItem = 1 or saveItem = 0
+                overhead "Unknown save location for {{desc}}" 34
+            endif
+            lift item
+            drop saveItem 0 0 0
+            wait globalTimeout
+            @ignore item
         endif
-        if saveItem = 1 or saveItem = 0
-            overhead "Unknown save location for {{desc}}" 34
-        endif
-        lift item
-        drop saveItem 0 0 0
-        wait globalTimeout
-        @ignore item
     endif
 
     if recycleItem = 1
@@ -1773,26 +1858,31 @@ while findtype 5056|5059|5060|5061|5063|5070|5074|5075|5076|5078|5085|5089|5090|
     if saveItem = 1
         overhead "Saving: {{desc}}" 77
         pushlist jaseowns_SavedItems desc
-        if "plate" in desc
-            @setvar! saveItem jase_Plate_Storage
-        elseif "chain" in desc
-            @setvar! saveItem jase_Chainmail_Storage
-        elseif "ring" in desc
-            @setvar! saveItem jase_Ringmail_Storage
-        elseif "bone" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "studded" in desc
-            @setvar! saveItem jase_BoneLeather_Storage
-        elseif "leather" in desc
-            @setvar! saveItem jase_RegularLeather_Storage
+        if "aspect" in desc
+            overhead "Aspected - not moving: {{desc}}" 77
+            @ignore item
+        else
+            if "plate" in desc
+                @setvar! saveItem jase_Plate_Storage
+            elseif "chain" in desc
+                @setvar! saveItem jase_Chainmail_Storage
+            elseif "ring" in desc
+                @setvar! saveItem jase_Ringmail_Storage
+            elseif "bone" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "studded" in desc
+                @setvar! saveItem jase_BoneLeather_Storage
+            elseif "leather" in desc
+                @setvar! saveItem jase_RegularLeather_Storage
+            endif
+            if saveItem = 1 or saveItem = 0
+                overhead "Unknown save location for {{desc}}" 34
+            endif
+            lift item
+            drop saveItem 0 0 0
+            wait globalTimeout
+            @ignore item
         endif
-        if saveItem = 1 or saveItem = 0
-            overhead "Unknown save location for {{desc}}" 34
-        endif
-        lift item
-        drop saveItem 0 0 0
-        wait globalTimeout
-        @ignore item
     endif
 
     if recycleItem = 1
