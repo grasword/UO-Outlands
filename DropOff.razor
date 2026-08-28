@@ -22,10 +22,10 @@
 ##
 
 ####################
-### Use >info to fill in tomeChest and myRecallScrollsChest
+### Use >info to fill in tomeChest, myRecallScrollsChest, and lootdropoff
 #####
 @setvar! globalTimeout 650
-@setvar! convenienceChest 0x411EDE22
+@setvar! convenienceChest 0x46019938
 @setvar! tomeChest 0x53891D79
 @setvar! myRecallScrollsChest 0x479D6FC8
 @setvar! bandagesToMoveIntoTrappedPouches 25
@@ -36,11 +36,7 @@
 @setvar! moveOnlyUnidentifiedItems 0
 
 # This is where loot goes that does not get sucked up into shelfs
-if not varexist lootdropoff or not find lootdropoff ground -1 -1 2
-    overhead "Where should items go that do not fit into a recycler or shelf?"
-    sysmsg "Where should items go that do not fit into a recycler or shelf?"
-    @setvar! lootdropoff
-endif
+@setvar! lootdropoff 0x00000000
 
 if not findlayer self righthand and varexist jase_righthand and jase_righthand != 0 and find jase_righthand self
     // handle crooky 
@@ -799,10 +795,7 @@ if followers > 0
     say "all follow me" 88
 endif
 
-@clearignore 
-
-
-
+@clearignore
 
 if varexist jootbag and find jootbag backpack
     hotkey "Set Grab Item Hotbag"
