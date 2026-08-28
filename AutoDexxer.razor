@@ -22,6 +22,11 @@ if not timerexists jaseowns_UseAbility3Timer
     settimer jaseowns_UseAbility3Timer 30000
 endif
 
+@setvar! jaseowns_ParalyzeTimerCD 3000
+if not timerexists jaseowns_ParalyzeTimer
+    settimer jaseowns_ParalyzeTimer jaseowns_ParalyzeTimerCD
+endif
+
 if findtype 8454|8455|43206|5363 self
     while not targetexists 
         overhead "You have valuable shit on you! Open target cursor to continue anyway stupidly" 17
@@ -31,9 +36,10 @@ if findtype 8454|8455|43206|5363 self
 endif 
 
 while not dead
-    if paralyzed 
+    if paralyzed and timer jaseowns_ParalyzeTimer >= jaseowns_ParalyzeTimerCD
         if findtype "pouch" backpack 38 as item
             yell "[pouch"
+            settimer jaseowns_ParalyzeTimer 0
         else
             overhead "Out of pouches!" 34
         endif
@@ -47,8 +53,8 @@ while not dead
             if insysmsg "cannot drop anything"
                 drop backpack -1 -1 -1
             endif
+            clearsysmsg
             wait 650
-            replay
         else
             overhead "We are overweight but cannot drop anything" 34
         endif
@@ -60,6 +66,7 @@ while not dead
         overhead "Bandage was started" 69
         sysmsg "Bandage was started" 69
         settimer jaseowns_BandageTimer 0
+        clearsysmsg
     endwhile
 
     // Reset the timer if we finished
@@ -67,6 +74,7 @@ while not dead
         overhead "Bandage has finished" 69
         sysmsg "Bandage has finished" 69
         settimer jaseowns_BandageTimer jaseowns_BandageTimerCD
+        clearsysmsg
     endwhile
 
     if timer jaseowns_BandageTimer >= jaseowns_BandageTimerCD
@@ -78,44 +86,48 @@ while not dead
                 sysmsg "Bandage was started" 69
                 settimer jaseowns_BandageTimer 0
             endif
+            clearsysmsg
         endif
     endif
     
     if jaseowns_UseAbility1 = 1 and timer jaseowns_UseAbility1Timer >= jaseowns_UseAbilityTimerCD
         say "[WeaponAbility1"
-        getlabel backpack jaseowns_PingCheck 
+        getlabel backpack jaseowns_PingCheck
         if insysmsg "You do cannot perform that ability yet."
             settimer jaseowns_UseAbility1Timer 0
         elseif insysmsg "You have not yet unlocked that weapon ability."
             @setvar! jaseowns_UseAbility1 0
         else
-            settimer jaseowns_UseAbility1Timer 0 
+            settimer jaseowns_UseAbility1Timer 0
         endif
-    endif 
+        clearsysmsg
+    endif
 
     if jaseowns_UseAbility2 = 1 and timer jaseowns_UseAbility2Timer >= jaseowns_UseAbilityTimerCD
         say "[WeaponAbility2"
-        getlabel backpack jaseowns_PingCheck 
+        getlabel backpack jaseowns_PingCheck
         if insysmsg "You do cannot perform that ability yet."
             settimer jaseowns_UseAbility2Timer 0
         elseif insysmsg "You have not yet unlocked that weapon ability."
             @setvar! jaseowns_UseAbility2 0
         else
-            settimer jaseowns_UseAbility2Timer 0 
+            settimer jaseowns_UseAbility2Timer 0
         endif
-    endif   
+        clearsysmsg
+    endif
     
     if jaseowns_UseAbility3 = 1 and timer jaseowns_UseAbility3Timer >= jaseowns_UseAbilityTimerCD
         say "[WeaponAbility3"
-        getlabel backpack jaseowns_PingCheck 
+        getlabel backpack jaseowns_PingCheck
         if insysmsg "You do cannot perform that ability yet."
             settimer jaseowns_UseAbility3Timer 0
         elseif insysmsg "You have not yet unlocked that weapon ability."
             @setvar! jaseowns_UseAbility3 0
         else
-            settimer jaseowns_UseAbility3Timer 0 
+            settimer jaseowns_UseAbility3Timer 0
         endif
-    endif   
+        clearsysmsg
+    endif
     
     wait 50
 
