@@ -14,8 +14,12 @@
 @setvar! jase_AutoDropLeather 0
 @setvar! jase_AutoDropScrolls 0
 
-# will drink the essence juice at end of script
-@setvar! jase_AutoConsumeArcaneEssence 0
+# will drink the essence juice at end of script - only for Dessan
+if name = "Dessan"
+    @setvar! jase_AutoConsumeArcaneEssence 1
+else
+    @setvar! jase_AutoConsumeArcaneEssence 0
+endif
 
 # accuracy
 @setvar! jase_save_supremely 1
