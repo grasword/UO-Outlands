@@ -53,12 +53,17 @@ while not dead
     endif
     
 
-    if not bandaging and (hp < maxhp or poisoned or findbuff "disease" or findbuff "bleed")
-        if findtype "clean bandage%s%" backpack
-            hotkey "Bandage Self"
-            wait 250
-        else
-            overhead "Out of bandages!" 34
+    if not bandaging
+        if hp < maxhp or poisoned or findbuff "disease" or findbuff "bleed"
+            if findtype "clean bandage%s%" backpack
+                if targetexists
+                    hotkey "cancel current target"
+                endif
+                hotkey "Bandage Self"
+                wait 250
+            else
+                overhead "Out of bandages!" 34
+            endif
         endif
     endif
     
