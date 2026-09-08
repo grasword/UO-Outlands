@@ -1,8 +1,3 @@
-@setvar! jaseowns_BandageTimerCD 20000
-if not timerexists jaseowns_BandageTimer
-    settimer jaseowns_BandageTimer jaseowns_BandageTimerCD
-endif
-
 @setvar! goldAmountToDrop 1000
 
 @setvar! jaseowns_UseAbilityTimerCD 5000
@@ -58,32 +53,12 @@ while not dead
     endif
     
 
-    // Handle manual bandage
-    while insysmsg "You begin applying"
-        overhead "Bandage was started" 69
-        sysmsg "Bandage was started" 69
-        settimer jaseowns_BandageTimer 0
-        clearsysmsg
-    endwhile
-
-    // Reset the timer if we finished
-    while insysmsg "You finish applying" or insysmsg "You heal what little" or insysmsg "barely help" or insysmsg "You fail to resurrect" or insysmsg "You are able to resurrect"
-        overhead "Bandage has finished" 69
-        sysmsg "Bandage has finished" 69
-        settimer jaseowns_BandageTimer jaseowns_BandageTimerCD
-        clearsysmsg
-    endwhile
-
-    if timer jaseowns_BandageTimer >= jaseowns_BandageTimerCD
-        if hp < maxhp or poisoned or findbuff "disease" or findbuff "bleed"
+    if not bandaging and (hp < maxhp or poisoned or findbuff "disease" or findbuff "bleed")
+        if findtype "clean bandage%s%" backpack
             hotkey "Bandage Self"
-            getlabel backpack jaseowns_PingCheck
-            if insysmsg "You begin applying"
-                overhead "Bandage was started" 69
-                sysmsg "Bandage was started" 69
-                settimer jaseowns_BandageTimer 0
-            endif
-            clearsysmsg
+            wait 250
+        else
+            overhead "Out of bandages!" 34
         endif
     endif
     
