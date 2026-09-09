@@ -25,7 +25,7 @@
 ### Use >info to fill in tomeChest, myRecallScrollsChest, and lootdropoff
 #####
 @setvar! globalTimeout 650
-@setvar! convenienceChest 0x46019925
+@setvar! convenienceChest 0x46019938
 @setvar! tomeChest 0x53891D79
 @setvar! myRecallScrollsChest 0x479D6FC8
 @setvar! bandagesToMoveIntoTrappedPouches 25
@@ -206,6 +206,64 @@ if myDynamicFind != 0
         wait globalTimeout
     endwhile
 endif
+
+// Boss tokens - find, drop off to lootdropoff, and shout which dungeon
+// Token graphics/hues match tokenScript.razor (5192 = main token, 17083 = mini token)
+// Names are printed as literals per-branch (not via a variable) - setvar!
+// stores serials/numbers, not text, so {{var}} interpolation of a name
+// string silently turned into the invalid-serial sentinel 4294967295.
+while findtype 5192|17083 backpack as item
+    if hue item == 1779
+        overhead "!!! AEGIS BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! AEGIS BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 2338
+        overhead "!!! CAVERNAM BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! CAVERNAM BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 2099
+        overhead "!!! DARKMIRE BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! DARKMIRE BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 1909
+        overhead "!!! INFERNO BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! INFERNO BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 2841
+        overhead "!!! KRAUL BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! KRAUL BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 2089
+        overhead "!!! PETRAM BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! PETRAM BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 2796
+        overhead "!!! NUSERO BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! NUSERO BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 2091
+        overhead "!!! OSSUARY BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! OSSUARY BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 2085
+        overhead "!!! PULMA BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! PULMA BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 2093
+        overhead "!!! SHADOWSPIRE BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! SHADOWSPIRE BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 2092
+        overhead "!!! MAUSOLEUM BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! MAUSOLEUM BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 1688
+        overhead "!!! TIDAL BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! TIDAL BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 1183
+        overhead "!!! OCEAN BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! OCEAN BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    elseif hue item == 1182
+        overhead "!!! WILDERNESS BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! WILDERNESS BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    else
+        overhead "!!! UNKNOWN BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+        sysmsg "!!! UNKNOWN BOSS TOKEN FOUND - DROPPED OFF !!!" 34
+    endif
+
+    lift item 60000
+    drop lootdropoff -1 -1 -1
+    wait globalTimeout
+endwhile
 
 @setvar! myDynamicFind 0
 if findtype "resource container" ground -1 -1 2 as myDyanmicFindValue
