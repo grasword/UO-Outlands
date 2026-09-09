@@ -1,0 +1,333 @@
+@clearignore
+
+//
+// ---- Variables ----
+//
+setvar! RedSpeechHue 37
+setvar! YelSpeechHue 53
+setvar! GrnSpeechHue 72
+
+@setvar! MainTokenBag 0x5DDDD1FF
+@setvar! MiniTokenBag 0x5DDDE5F3
+
+
+//
+// ---- Initilizations ----
+//
+if not listexists "TokensList"
+    createlist "TokensList"
+else
+    clearlist "TokensList"
+endif
+
+
+//
+// ---- Add Tokens to Lists ----
+//
+#Open token parent containers only if necessary
+#For example, you have not opened the chests since logging in
+if counttype 5192 MainTokenBag 1182 == 0
+    if find 0x43CA95A7 ground -1 1 2
+        dclick 0x43CA95A7
+        wait 500
+        dclick 0x4E46D762
+        wait 500
+        dclick MainTokenBag
+        wait 500
+        dclick MiniTokenBag
+        wait 500
+    endif
+endif
+
+if find 0x43CA920D ground -1 1 2 as topchest
+    dclick topchest
+    while findtype 5192 topchest as token
+        lift token
+        drop MainTokenBag
+    endwhile
+    while findtype 17083 topchest as token
+        lift token
+        drop MiniTokenBag
+    endwhile
+endif
+
+#Add Token hues to list in alphabetical order
+pushlist TokensList 1779
+pushlist TokensList 2338
+pushlist TokensList 2099
+pushlist TokensList 1909
+pushlist TokensList 2841
+pushlist TokensList 2089
+pushlist TokensList 2796
+pushlist TokensList 2091
+pushlist TokensList 2085
+pushlist TokensList 2093 
+pushlist TokensList 2092 
+pushlist TokensList 1688  
+pushlist TokensList 1183
+pushlist TokensList 1182
+
+//Tidal tomb 1688
+
+//
+// ---- Calculate ----
+//
+foreach 'tokenColor' in "TokensList"
+    @setvar! mainCounter 0
+    @setvar! miniCounter 0
+    if tokenColor == 1779
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "AEGIS MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "AEGIS MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "AEGIS MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "AEGIS MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "Aegis check fail"
+        endif
+    elseif tokenColor == 2338
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "CAVERNAM MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "CAVERNAM MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "CAVERNAM MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "CAVERNAM MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "CAVERNAM check fail"
+        endif
+    elseif tokenColor == 2099
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "DARKMIRE MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "DARKMIRE MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "DARKMIRE MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "DARKMIRE MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "DARKMIRE check fail"
+        endif
+    elseif tokenColor == 1909
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "INFERNO MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "INFERNO MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "INFERNO MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "INFERNO MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "INFERNO check fail"
+        endif
+    elseif tokenColor == 2841
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "KRAUL MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "KRAUL MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "KRAUL MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "KRAUL MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "KRAUL check fail"
+        endif
+    elseif tokenColor == 2089
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "PETRAM MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "PETRAM MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "PETRAM MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "PETRAM MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "PETRAM check fail"
+        endif
+    elseif tokenColor == 2796
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "NUSERO MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "NUSERO MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "NUSERO MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "NUSERO MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "NUSERO check fail"
+        endif
+    elseif tokenColor == 2091
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "OSSUARY MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "OSSUARY MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "OSSUARY MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "OSSUARY MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "OSSUARY check fail"
+        endif
+    elseif tokenColor == 2085
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "PULMA MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "PULMA MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "PULMA MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "PULMA MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "PULMA check fail"
+        endif
+    elseif tokenColor == 2093
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "SHADOWSPIRE MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "SHADOWSPIRE MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "SHADOWSPIRE MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "SHADOWSPIRE MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "SHADOWSPIRE check fail"
+        endif
+    elseif tokenColor == 2092
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "MAUSOLEUM MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "MAUSOLEUM MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "MAUSOLEUM MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "MAUSOLEUM MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "MAUSOLEUM check fail"
+        endif
+    elseif tokenColor == 1688
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "TIDAL MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "TIDAL MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "TIDAL MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "TIDAL MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "TIDAL check fail"
+        endif
+    elseif tokenColor == 1183
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "OCEAN MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "OCEAN MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "OCEAN MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "OCEAN MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "OCEAN check fail"
+        endif
+    elseif tokenColor == 1182
+        if counttype 5192 MainTokenBag tokenColor as mainCnt
+            @setvar! mainCounter mainCnt
+        endif
+        if counttype 17083 MiniTokenBag tokenColor as miniCnt
+            @setvar! miniCounter miniCnt
+        endif
+        if mainCounter < 1 or miniCounter < 1
+            sysmsg "WILDERNESS MAIN {{mainCounter}} || MINI {{miniCounter}}" RedSpeechHue
+        elseif mainCounter <= 1 and miniCounter >= 1
+            sysmsg "WILDERNESS MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter >= 1 and miniCounter <= 1
+            sysmsg "WILDERNESS MAIN {{mainCounter}} || MINI {{miniCounter}}" YelSpeechHue
+        elseif mainCounter > 1 and miniCounter > 1
+            sysmsg "WILDERNESS MAIN {{mainCounter}} || MINI {{miniCounter}}" GrnSpeechHue
+        else
+            overhead "WILDERNESS check fail"
+        endif
+    else
+        overhead "Token check fail"
+    endif
+endfor
