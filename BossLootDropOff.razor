@@ -4,7 +4,7 @@
 # - move gold into distros, stacking it, not anymore into the gold box in the NCO chest
 # - move rares into distros in stacks, stacking them, no longer splitting them into 1s
 # - not checking for stacked rares anymore
-# - mini-Rares are moved into the distro on SPLIT as a full stack, except for arcane scrolls, which is moved in stacks of 5.
+# - mini-Rares, including arcane scrolls, are moved into the distro as a full stack (the distro chest splits them).
 # - added tax switch for RMs
 # This should run faster and cause less problems since there are less lift and drop pairs.
 #Removed section checking for stacked rares in Distro, it was commented out, but did execute for me.
@@ -28,7 +28,8 @@
 #   CFC Public Chest / backpack
 #     -> rares, rare cloth, accessory dye, maps, gold -> Distro One (overflow: Distro Two)
 #     -> mini-rares                                    -> Distro Two
-#     -> boss tokens, tax items, legendary T8 maps    -> NCO main
+#     -> boss tokens                                  -> Boss tokens container
+#     -> tax items, legendary T8 maps                 -> NCO main
 #     -> raw resources                                 -> NCO resources chest (inside NCO main)
 #     -> unidentified magic items                      -> recycler
 #
@@ -40,7 +41,7 @@
 # Must be a 'distribution chest'.
 @setvar! CFG_DistroOne 0x4630999E
 # --- DISTRO TWO: mini-rares and overflow ---
-# Always gets the mini-rares: arcane scrolls (stacks of 5, if not taxed), plant chemicals,
+# Always gets the mini-rares: arcane scrolls (if not taxed), plant chemicals,
 # phylacteries, carpet dye, melloweed leaves, mount gear dye.
 # Also gets Distro One's loot when Distro One is full.
 @setvar! CFG_DistroTwo 0x40FD50C6
@@ -50,7 +51,7 @@
 # the CFC Public Chest shows "(0 items", otherwise the script starts over.
 @setvar! CFG_PublicChest 0x583561C4
 # --- NCO MAIN: secure guild storage for things that are NOT distributed ---
-# Gets boss tokens (main and mini, announced in chat), arcane essence, mastery chain links,
+# Gets arcane essence, mastery chain links (and boss tokens if there is no token container),
 # legendary T8 treasure maps (hue 2091), MCDs/RMs/arcane scrolls when taxed,
 # and any resources/tax items found in the distros by the verify step.
 # It must also contain the NCO resources and mini-loot chests below,
@@ -60,6 +61,9 @@
 # Boss runes from your backpack and the CFC Public Chest are added to it.
 # Set to 0 to search NCO main for a rune tome (item 70158, hue 2085) instead.
 @setvar! CFG_RuneTome 0x42CBB047
+# --- BOSS TOKENS: container for boss tokens (main and mini) ---
+# Can be inside NCO main or a chest within 2 tiles. Set to 0 to keep tokens in NCO main.
+@setvar! CFG_Tokens 0x42244475
 # --- NCO RESOURCES: chest INSIDE NCO main ---
 # Gets raw food, leather, ingots, boards and seeds.
 @setvar! CFG_NCOresources 0x4871BAC2
@@ -71,7 +75,7 @@
 
 ### OPTIONS ###
 # If you want to drop off Arcane Runes, set to 1.
-@setvar! storeArcaneRunes 0
+@setvar! storeArcaneRunes 1
 # If you want to auto recycle magic items when recycler is full, set to 1.
 @setvar! autoRecycle 1
 #If you want to check the distros for stacked items, set to 1
@@ -81,6 +85,8 @@
 @setvar! split 1
 #this adds leather to the rares list for testing purposes, set to 1
 @setvar! debug 0
+#TEMPORARY: while testing, your character says a warning in chat at the start, set to 0 to turn off
+@setvar! testAnnounce 1
 #checks for MCDs and Arcane Scrolls on the ground to determine if those should be tax or distro items
 if findtype 17087 ground 0 any 8 as MCD
     sysmsg "Found MCD on ground, adding MCD to guild tax items" 818
@@ -102,6 +108,9 @@ else
 endif
 
 sysmsg 'BOSSLOOT-DROP-OFF Started _BosslootDropOffSingle' 44
+if testAnnounce = 1
+    say 'Testing drop off script, please use bottom distro if needed'
+endif
 
 # Magic items to Recycler (and auto recycle if you have it set to 1 at start)
 if findtype '57484|57495|11761|11762' true as 'recycler'
@@ -256,6 +265,16 @@ elseif not varexist BDONCOmini or not find BDONCOmini BDONCOmain
         overhead "Select NCO mini-loot chest"
         @setvar BDONCOmini
     endwhile
+endif
+
+#Boss token container, tokens go to NCO main if it is not found
+@setvar! BDOTokens BDONCOmain
+if CFG_Tokens != 0
+    if find CFG_Tokens BDONCOmain or find CFG_Tokens ground -1 -1 2
+        @setvar! BDOTokens CFG_Tokens
+    else
+        overhead 'TOKEN CONTAINER NOT FOUND, tokens go to NCO main' 44
+    endif
 endif
 
 removelist minirarelist
@@ -498,21 +517,21 @@ endwhile
 sysmsg "Dropping Mini-Rares into Distro Two" 14
 foreach itemtype in minirarelist
     if itemtype = 3827
-        //arcane scrolls
+        //arcane scrolls, only the pink ones (hue 2609), moved as a full stack
         while findtype itemtype backpack 2609 as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
-            lift item 5
+            lift item 60000
             wait 200
-            drop BDODistroTwo 10 10
+            drop BDODistroTwo -1 -1 -1
             wait 500
         endwhile
         while findtype itemtype BDOPublicChest 2609 as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
-            lift item 5
+            lift item 60000
             wait 200
-            drop BDODistroTwo 10 10
+            drop BDODistroTwo -1 -1 -1
             wait 500
         endwhile
     else
@@ -681,7 +700,7 @@ foreach itemtype in resourcelist
     endwhile
 endfor
 
-sysmsg "Moving tax items into NCO main chest" 14
+sysmsg "Moving boss tokens and tax items" 14
 foreach itemtype in taxlist
     while findtype itemtype backpack as item
         getlabel item lbl
@@ -750,7 +769,11 @@ foreach itemtype in taxlist
         endif
         lift item 60000
         wait 200
-        drop BDONCOmain -1 -1 -1
+        if itemtype = 17083 or itemtype = 5192
+            drop BDOTokens -1 -1 -1
+        else
+            drop BDONCOmain -1 -1 -1
+        endif
         wait 500
     endwhile
     while findtype itemtype BDOPublicChest as item
@@ -820,7 +843,11 @@ foreach itemtype in taxlist
         endif
         lift item 60000
         wait 200
-        drop BDONCOmain -1 -1 -1
+        if itemtype = 17083 or itemtype = 5192
+            drop BDOTokens -1 -1 -1
+        else
+            drop BDONCOmain -1 -1 -1
+        endif
         wait 500
     endwhile
 endfor
@@ -843,26 +870,14 @@ if split = 1 and varexist BDOsplit and BDOsplit = 1
     endif
     if BDODistro != 0
         foreach itemtype in minirarelist
-            #distro chests do not automatically split arcane scrolls
-            if itemtype = 3827
-                while findtype itemtype BDONCOmini as item
-                    getlabel item lbl
-                    sysmsg "{{item}} {{lbl}}" 818
-                    lift item 5
-                    wait 200
-                    drop BDODistro 10 10
-                    wait 500
-                endwhile
-            else
-                while findtype itemtype BDONCOmini as item
-                    getlabel item lbl
-                    sysmsg "{{item}} {{lbl}}" 818
-                    lift item 60000
-                    wait 200
-                    drop BDODistro 10 10
-                    wait 500
-                endwhile
-            endif
+            while findtype itemtype BDONCOmini as item
+                getlabel item lbl
+                sysmsg "{{item}} {{lbl}}" 818
+                lift item 60000
+                wait 200
+                drop BDODistro 10 10
+                wait 500
+            endwhile
         endfor
     endif
     @setvar BDOsplit 0
@@ -876,7 +891,11 @@ if verify = 1
             sysmsg "{{item}} {{lbl}}" 818
             lift item 60000
             wait 200
-            drop BDONCOmain -1 -1 -1
+            if itemtype = 17083 or itemtype = 5192
+                drop BDOTokens -1 -1 -1
+            else
+                drop BDONCOmain -1 -1 -1
+            endif
             wait 500
             @ignore item
         endwhile
@@ -885,7 +904,11 @@ if verify = 1
             sysmsg "{{item}} {{lbl}}" 818
             lift item 60000
             wait 200
-            drop BDONCOmain -1 -1 -1
+            if itemtype = 17083 or itemtype = 5192
+                drop BDOTokens -1 -1 -1
+            else
+                drop BDONCOmain -1 -1 -1
+            endif
             wait 500
             @ignore item
         endwhile
