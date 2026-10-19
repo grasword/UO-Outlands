@@ -8,8 +8,71 @@
 # - added tax switch for RMs
 # This should run faster and cause less problems since there are less lift and drop pairs.
 #Removed section checking for stacked rares in Distro, it was commented out, but did execute for me.
+#Adapted for CFC: all guild containers are configured in the GUILD CONTAINERS section below.
 
-@clearignore 
+@clearignore
+
+### GUILD CONTAINERS ###
+# Serials of your guild's containers. Use >info in game to get a container's serial.
+# Set a value to 0 and the script will ask you to target that container instead.
+# The chosen containers are remembered (BDO... variables) until they are out of range.
+#
+# ROOM LAYOUT: stand where every chest below is within 2 tiles of you.
+# You also need, within reach:
+# - an item recycler (found automatically by type, the script STOPS without one)
+# - optional "tax switches": lock down a Master Crafting Diagram, a pink Arcane Scroll
+#   or Research Materials within 8 tiles to make that item a guild tax item
+#   (it then goes to the NCO top chest instead of a distro)
+#
+# HOW LOOT FLOWS (backpack and Inbox are both emptied):
+#   Inbox / backpack
+#     -> rares, rare cloth, accessory dye, maps, gold -> Distro One (overflow: Two, then Three)
+#     -> mini-rares                                    -> Distro Two
+#     -> boss tokens, tax items, legendary T8 maps    -> NCO top
+#     -> raw resources                                 -> Resources chest (inside NCO bottom)
+#     -> unidentified magic items                      -> recycler
+#
+# --- DISTRO ONE: main boss loot distro ---
+# Gets the valuable loot: aspect cores, distillations, skill orbs and scrolls, survival gear,
+# spell hue deeds, dungeon seeds, dyes, carpet tiles, MCDs/RMs (if not taxed), rare cloth,
+# accessory dye, treasure and resource maps, gold, checks and doubloons.
+# At the end the script opens its distribution gump so YOU hand the loot out to the players.
+# Must be a 'distribution chest'.
+@setvar! CFG_DistroOne 0x4630999E
+# --- DISTRO TWO: mini-rares and first overflow ---
+# Always gets the mini-rares: arcane scrolls (stacks of 5, if not taxed), plant chemicals,
+# phylacteries, carpet dye, melloweed leaves, mount gear dye.
+# Also gets Distro One's loot when Distro One is full.
+@setvar! CFG_DistroTwo 0x40FD50C6
+# --- DISTRO THREE: "lesser loot" distro and last overflow ---
+# Gets loot only when Distro One and Two are full.
+# At the end, after [bossresults, the script distributes this chest AUTOMATICALLY
+# (clicks button 6 twice in its gump) and waits for the result list before opening Distro One.
+@setvar! CFG_DistroThree 0x443EA34F
+# --- INBOX: drop-off chest where members put their boss loot ---
+# Anyone in the group should be able to drop into it. The script empties it completely;
+# arcane runes are taken out into your backpack. The final distribution only starts when
+# the Inbox shows "(0 items", otherwise the script starts over.
+@setvar! CFG_Inbox 0x403434FC
+# --- NCO TOP: secure guild storage for things that are NOT distributed ---
+# Gets boss tokens (main and mini, announced in chat), arcane essence, mastery chain links,
+# legendary T8 treasure maps (hue 2091), MCDs/RMs/arcane scrolls when taxed,
+# and any resources/tax items found in the distros by the verify step.
+# If storeArcaneRunes = 1 it must also contain the arcane rune tome (a book with hue 2085).
+@setvar! CFG_NCOtop 0x43CA920D
+# --- NCO BOTTOM: secure chest that only holds the two sub-chests below ---
+# Nothing is dropped into it directly, it is opened so the chests inside can be reached.
+@setvar! CFG_NCObottom 0x43C4ABD0
+# --- RESOURCES: chest INSIDE NCO bottom ---
+# Gets raw food, leather, ingots, boards and seeds.
+@setvar! CFG_NCObottomResources 0x5E53E7D5
+# --- MINI-LOOT: chest INSIDE NCO bottom, a stash of mini-rares ---
+# This script never puts anything in it. It is only used by the SPLIT step: when split = 1
+# and the toggle script set BDOsplit = 1, mini-rares from here are moved into the first
+# EMPTY distro so they can be split between players.
+@setvar! CFG_NCObottomMini 0x52B369CF
+
+### OPTIONS ###
 # If you want to drop off Arcane Runes, set to 1.
 @setvar! storeArcaneRunes 0
 # If you want to auto recycle magic items when recycler is full, set to 1.
@@ -19,25 +82,25 @@
 #If you want to split minirares (see list below) into a distro, set to 1.
 #there is a second script to change a variable so you can turn this on at runtime.
 @setvar! split 1
-#this adds leather to the rares list for testing purposese, set to 1
+#this adds leather to the rares list for testing purposes, set to 1
 @setvar! debug 0
 #checks for MCDs and Arcane Scrolls on the ground to determine if those should be tax or distro items
 if findtype 17087 ground 0 any 8 as MCD
     sysmsg "Found MCD on ground, adding MCD to guild tax items" 818
     @setvar! taxMCDs 1
-else 
+else
     @setvar! taxMCDs 0
 endif
 if findtype 3827 ground 2609 any 8 as pinkscrolls
     sysmsg "Found arcane scroll on ground, adding arcane scroll to guild tax items" 818
     @setvar! taxPinkScrolls 1
-else 
+else
     @setvar! taxPinkScrolls 0
 endif
 if findtype 24434 ground 0 any 8 as researchmats
     sysmsg "Found research materials on ground, adding RMs to guild tax items" 818
     @setvar! taxRMs 1
-else 
+else
     @setvar! taxRMs 0
 endif
 
@@ -49,7 +112,7 @@ if findtype '57484|57495|11761|11762' true as 'recycler'
     menu 'recycler' 1
         wait 1000
         if autoRecycle = 1
-            getlabel recycler reclabel 
+            getlabel recycler reclabel
             overhead reclabel 53
             if "(125 items," in reclabel
                 overhead "Recycler full" 44
@@ -68,205 +131,167 @@ if findtype '57484|57495|11761|11762' true as 'recycler'
             endif
         endif
 else
-    sysmsg 'ITEM RECYCLER NOT FOUND. STOPPING.' 44 
+    sysmsg 'ITEM RECYCLER NOT FOUND. STOPPING.' 44
     stop
 endif
 
-if not varexist BDODistroOne or not find BDODistroOne ground -1 -1 2
-    if find 0x40D91E54 ground -1 -1 2
-        @setvar BDODistroOne 0x40D91E54
-    else 
-        overhead 'Select distro one'
-        hotkey 'Clear Target Queue'
-        @setvar BDODistroOne
-        wft 500
-        while targetexists 
-            wait 100
-        endwhile
-        getlabel BDODistroOne lbl
-        if find BDODistroOne ground any any 2 and 'distribution chest' in lbl
-            wait 500
+if CFG_DistroOne != 0 and find CFG_DistroOne ground -1 -1 2
+    @setvar BDODistroOne CFG_DistroOne
+elseif not varexist BDODistroOne or not find BDODistroOne ground -1 -1 2
+    overhead 'Select distro one'
+    hotkey 'Clear Target Queue'
+    @setvar BDODistroOne
+    wft 500
+    while targetexists
+        wait 100
+    endwhile
+    getlabel BDODistroOne lbl
+    if find BDODistroOne ground any any 2 and 'distribution chest' in lbl
+        wait 500
         overhead 'Distro one set!' 14
-            dclick BDODistroOne
-            wait 500
-        else
-            overhead 'Wrong chest or too far away!' 33
-            replay
-        endif
+        dclick BDODistroOne
+        wait 500
+    else
+        overhead 'Wrong chest or too far away!' 44
+        replay
     endif
-endif    
+endif
 
-if not varexist BDODistroTwo or not find BDODistroTwo ground -1 -1 2
-    if find 0x4CD81A43 ground -1 -1 2
-        @setvar BDODistroTwo 0x4CD81A43
-    else 
-        overhead 'Select distro two'
-        hotkey 'Clear Target Queue'
-        @setvar BDODistroTwo
-        wft 500
-        while targetexists 
-            wait 100
-        endwhile
-        getlabel BDODistroTwo lbl
-        if find BDODistroTwo ground any any 2 and 'distribution chest' in lbl
-            wait 500
+if CFG_DistroTwo != 0 and find CFG_DistroTwo ground -1 -1 2
+    @setvar BDODistroTwo CFG_DistroTwo
+elseif not varexist BDODistroTwo or not find BDODistroTwo ground -1 -1 2
+    overhead 'Select distro two'
+    hotkey 'Clear Target Queue'
+    @setvar BDODistroTwo
+    wft 500
+    while targetexists
+        wait 100
+    endwhile
+    getlabel BDODistroTwo lbl
+    if find BDODistroTwo ground any any 2 and 'distribution chest' in lbl
+        wait 500
         overhead 'Distro two set!' 14
-            dclick BDODistroTwo
-            wait 500
-        else
-            overhead 'Wrong chest or too far away!' 44
-            replay
-        endif
+        dclick BDODistroTwo
+        wait 500
+    else
+        overhead 'Wrong chest or too far away!' 44
+        replay
     endif
-endif 
+endif
 
-if not varexist BDODistroThree or not find BDODistroThree ground -1 -1 2
-    if find 0x443EA34F ground -1 -1 2
-        @setvar BDODistroThree 0x443EA34F
-    else 
-        overhead 'Select distro three'
-        hotkey 'Clear Target Queue'
-        @setvar BDODistroThree
-        wft 500
-        while targetexists 
-            wait 100
-        endwhile
-        getlabel BDODistroThree lbl
-        if find BDODistroTwo ground any any 2 and 'distribution chest' in lbl
-            wait 500
-        overhead 'Rares distro three set!' 14
-            dclick BDODistroThree
-            wait 500
-        else
-            overhead 'Wrong chest or too far away!' 44
-            replay
-        endif
+if CFG_DistroThree != 0 and find CFG_DistroThree ground -1 -1 2
+    @setvar BDODistroThree CFG_DistroThree
+elseif not varexist BDODistroThree or not find BDODistroThree ground -1 -1 2
+    overhead 'Select distro three'
+    hotkey 'Clear Target Queue'
+    @setvar BDODistroThree
+    wft 500
+    while targetexists
+        wait 100
+    endwhile
+    getlabel BDODistroThree lbl
+    if find BDODistroThree ground any any 2 and 'distribution chest' in lbl
+        wait 500
+        overhead 'Distro three set!' 14
+        dclick BDODistroThree
+        wait 500
+    else
+        overhead 'Wrong chest or too far away!' 44
+        replay
     endif
-endif 
+endif
 
-if not varexist BDOInbox or not find BDOInbox ground -1 -1 2
-    if find 0x403434FC ground -1 -1 2
-        @setvar BDOInbox 0x403434FC
-    else 
-        overhead 'Select inbox'
-        hotkey 'Clear Target Queue'
-        @setvar BDOInbox
-        wft 500
-        while targetexists 
-            wait 100
-        endwhile
-        if find BDOInbox ground any any 2 
-            overhead 'Inbox set!' 14
-            dclick BDOInbox
-            wait 500
-        else
-            overhead 'Wrong chest or too far away!' 44
-            replay
-        endif
+if CFG_Inbox != 0 and find CFG_Inbox ground -1 -1 2
+    @setvar BDOInbox CFG_Inbox
+elseif not varexist BDOInbox or not find BDOInbox ground -1 -1 2
+    overhead 'Select inbox'
+    hotkey 'Clear Target Queue'
+    @setvar BDOInbox
+    wft 500
+    while targetexists
+        wait 100
+    endwhile
+    if find BDOInbox ground any any 2
+        overhead 'Inbox set!' 14
+        dclick BDOInbox
+        wait 500
+    else
+        overhead 'Wrong chest or too far away!' 44
+        replay
     endif
-endif 
+endif
 
-if not varexist BDONCOtop or not find BDONCOtop ground -1 -1 2
-    if find 0x43CA920D ground -1 -1 2
-        @setvar BDONCOtop 0x43CA920D
-    else 
-        overhead 'Select NCOsecure'
-        hotkey 'Clear Target Queue'
-        @setvar BDONCOtop
-        wft 500
-        while targetexists 
-            wait 100
-        endwhile
-        if find BDONCOtop ground any any 2 
-            overhead 'Inbox set!' 14
-            dclick BDONCOtop
-            wait 500
-        else
-            overhead 'Wrong chest or too far away!' 44
-            replay
-        endif
+if CFG_NCOtop != 0 and find CFG_NCOtop ground -1 -1 2
+    @setvar BDONCOtop CFG_NCOtop
+elseif not varexist BDONCOtop or not find BDONCOtop ground -1 -1 2
+    overhead 'Select top NCO chest'
+    hotkey 'Clear Target Queue'
+    @setvar BDONCOtop
+    wft 500
+    while targetexists
+        wait 100
+    endwhile
+    if find BDONCOtop ground any any 2
+        overhead 'Top NCO chest set!' 14
+        dclick BDONCOtop
+        wait 500
+    else
+        overhead 'Wrong chest or too far away!' 44
+        replay
     endif
-endif 
-
-#not needed anymore with direct distro
-#dclick BDONCOtop
-#wait 500
+endif
 
 # Arcane Runes to the Rune Tome in Top NCO Chest
 if storeArcaneRunes = 1 and find BDONCOtop ground any any 2 and findtype 'rune' backpack
     if findtype 'book' BDONCOtop 2085 as 'arcanerunetome'
-    overhead 'Putting away boss runes...' 44
+        overhead 'Putting away boss runes...' 44
         menu 'arcanerunetome' 0
     else
         overhead 'ARCANE RUNE TOME NOT FOUND' 14
     endif
 endif
 
-if not varexist BDONCObottom or not find BDONCObottom ground -1 -1 2
-    if find 0x43C4ABD0 ground -1 -1 2
-        @setvar BDONCObottom 0x43C4ABD0
-    else 
-        overhead 'Select inbox'
-        hotkey 'Clear Target Queue'
-        @setvar BDONCObottom
-        wft 500
-        while targetexists 
-            wait 100
-        endwhile
-        if find BDONCObottom ground any any 2 
-            overhead 'Inbox set!' 44
-            dclick BDONCObottom
-            wait 500
-        else
-            overhead 'Wrong chest or too far away!' 14
-            replay
-        endif
+if CFG_NCObottom != 0 and find CFG_NCObottom ground -1 -1 2
+    @setvar BDONCObottom CFG_NCObottom
+elseif not varexist BDONCObottom or not find BDONCObottom ground -1 -1 2
+    overhead 'Select bottom NCO chest'
+    hotkey 'Clear Target Queue'
+    @setvar BDONCObottom
+    wft 500
+    while targetexists
+        wait 100
+    endwhile
+    if find BDONCObottom ground any any 2
+        overhead 'Bottom NCO chest set!' 14
+        dclick BDONCObottom
+        wait 500
+    else
+        overhead 'Wrong chest or too far away!' 44
+        replay
     endif
-endif 
+endif
 
 dclick BDONCObottom
 wait 500
 
 #Resourcechest
-if not varexist BDONCObottomResources or not find BDONCObottom ground -1 -1 2
-    if find 0x5E53E7D5 BDONCObottom
-        @setvar BDONCObottomResources 0x5E53E7D5
-    else
-        if not find BDONCObottomResources BDONCObottom and find BDONCObottom ground any any 2
-            while not find BDONCObottomResources BDONCObottom
-                overhead "Select Resource chest"
-                @setvar BDONCObottomResources
-            endwhile
-        endif
-    endif
+if CFG_NCObottomResources != 0 and find CFG_NCObottomResources BDONCObottom
+    @setvar BDONCObottomResources CFG_NCObottomResources
+elseif not varexist BDONCObottomResources or not find BDONCObottomResources BDONCObottom
+    while not find BDONCObottomResources BDONCObottom
+        overhead "Select Resource chest"
+        @setvar BDONCObottomResources
+    endwhile
 endif
 
-#Goldchest
-if not varexist BDONCObottomGold or not find BDONCObottom ground -1 -1 2
-    if find 0x4AFCE5AE BDONCObottom
-        @setvar BDONCObottomGold 0x4AFCE5AE
-    else
-        if not find BDONCObottomGold BDONCObottom and find BDONCObottom ground any any 2
-            while not find BDONCObottomGold BDONCObottom
-                overhead "Select Gold Chest"
-                @setvar BDONCObottomGold
-            endwhile
-        endif
-    endif
-endif
-
-#Goldchest
-if not varexist BDONCObottomMini or not find BDONCObottom ground -1 -1 2
-    if find 0x52B369CF BDONCObottom
-        @setvar BDONCObottomMini 0x52B369CF
-    else
-        if not find BDONCObottomMini BDONCObottom and find BDONCObottom ground any any 2
-            while not find BDONCObottomMini BDONCObottom
+#Minichest
+if CFG_NCObottomMini != 0 and find CFG_NCObottomMini BDONCObottom
+    @setvar BDONCObottomMini CFG_NCObottomMini
+elseif not varexist BDONCObottomMini or not find BDONCObottomMini BDONCObottom
+    while not find BDONCObottomMini BDONCObottom
         overhead "Select Mini-Loot Chest"
-                @setvar BDONCObottomMini
-            endwhile
-        endif
-    endif
+        @setvar BDONCObottomMini
+    endwhile
 endif
 
 removelist minirarelist
@@ -339,7 +364,7 @@ if debug = 1
     #test leather
     pushlist rarelist 4225
 endif
-  
+
 removelist resourcelist
 createlist resourcelist
 #Raw Food
@@ -405,7 +430,7 @@ dclick BDOInbox
 sysmsg "Dropping Rares into Distrochest" 14
 foreach itemtype in rarelist
     while findtype itemtype backpack as item
-        @clearsysmsg 
+        @clearsysmsg
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
         lift item 60000
@@ -426,6 +451,7 @@ foreach itemtype in rarelist
         endif
     endwhile
     while findtype itemtype BDOInbox as item
+        @clearsysmsg
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
         lift item 60000
@@ -445,7 +471,7 @@ foreach itemtype in rarelist
             endif
         endif
     endwhile
-endfor    
+endfor
 
 if findtype 5899|5903|5905|5901 BDOInbox as myshoes
     getlabel myshoes lbl
@@ -456,23 +482,26 @@ if findtype 5899|5903|5905|5901 BDOInbox as myshoes
     wait 500
 endif
 
-if findtype 5899|5903|5905|5901 backpack as myshoes
+while findtype 5899|5903|5905|5901 backpack as myshoes
     getlabel myshoes lbl
     sysmsg "found shoes: {{lbl}}"
     if "blessed" in lbl
-        ignore myshoes
-    else 
-        if findtype 3999 as myscissors
-            dclick myscissors
-            wft 1000
-            target myshoes
-         endif
+        @ignore myshoes
+    elseif findtype 3999 backpack as myscissors
+        dclick myscissors
+        wft 1000
+        target myshoes
+        wait 500
+        @ignore myshoes
+    else
+        sysmsg "No scissors found to cut shoes into rare cloth" 44
+        break
     endif
-endif
+endwhile
 
 sysmsg "Dropping rare cloth and accessory dye into Distrochest" 14
 while findtype 5981|3843 backpack as item
-    @clearsysmsg 
+    @clearsysmsg
     getlabel item lbl
     sysmsg "{{item}} {{lbl}}" 818
     lift item 6
@@ -492,7 +521,8 @@ while findtype 5981|3843 backpack as item
         endif
     endif
 endwhile
-while findtype 5981 BDOInbox as item
+while findtype 5981|3843 BDOInbox as item
+    @clearsysmsg
     getlabel item lbl
     sysmsg "{{item}} {{lbl}}" 818
     lift item 6
@@ -513,11 +543,11 @@ while findtype 5981 BDOInbox as item
     endif
 endwhile
 
-sysmsg "Dropping Mini-Rares into Distro Three" 14
+sysmsg "Dropping Mini-Rares into Distro Two" 14
 foreach itemtype in minirarelist
     if itemtype = 3827
-        //arcane srolls    
-    while findtype itemtype backpack 2609 as item
+        //arcane scrolls
+        while findtype itemtype backpack 2609 as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
             lift item 5
@@ -532,8 +562,8 @@ foreach itemtype in minirarelist
             wait 200
             drop BDODistroTwo 10 10
             wait 500
-        endwhile    
-    else 
+        endwhile
+    else
         while findtype itemtype backpack as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
@@ -551,7 +581,7 @@ foreach itemtype in minirarelist
             wait 500
         endwhile
     endif
-endfor 
+endfor
 
 sysmsg "Dropping T8s in NCO chest" 14
 while findtype 5356 backpack 2091 as item
@@ -588,16 +618,21 @@ pushlist maphues 2651
 
 removelist maptypes
 createlist maptypes
-pushlist maptypes 70148 //fishing-map
-pushlist maptypes 70151 //lumber-map
-pushlist maptypes 70154 //ore-map
-pushlist maptypes 70157 //skinning-map
+#fishing map
+pushlist maptypes 70148
+#lumber map
+pushlist maptypes 70151
+#ore map
+pushlist maptypes 70154
+#skinning map
+pushlist maptypes 70157
+#treasure map
 pushlist maptypes 5356
 
 sysmsg "Dropping maps in distro chest" 14
 foreach type in maptypes
     while findtype type backpack as item
-        @clearsysmsg 
+        @clearsysmsg
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
         lift item 1
@@ -618,6 +653,7 @@ foreach type in maptypes
         endif
     endwhile
     while findtype type BDOInbox as item
+        @clearsysmsg
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
         lift item 1
@@ -637,11 +673,12 @@ foreach type in maptypes
             endif
         endif
     endwhile
-endfor  
+endfor
 
 sysmsg "Dropping money into Distrochest" 14
 foreach itemtype in goldlist
     while findtype itemtype backpack as item
+        @clearsysmsg
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
         lift item 60000
@@ -662,6 +699,7 @@ foreach itemtype in goldlist
         endif
     endwhile
     while findtype itemtype BDOInbox as item
+        @clearsysmsg
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
         lift item 60000
@@ -681,7 +719,7 @@ foreach itemtype in goldlist
             endif
         endif
     endwhile
-endfor 
+endfor
 
 sysmsg "Dropping resources into Resourcechest" 14
 foreach itemtype in resourcelist
@@ -701,15 +739,14 @@ foreach itemtype in resourcelist
         drop BDONCObottomResources -1 -1 -1
         wait 500
     endwhile
-endfor 
+endfor
 
 sysmsg "Moving tax items into top NCO chest" 14
 foreach itemtype in taxlist
     while findtype itemtype backpack as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
-        if itemtype = 17083 
-            //or itemtype = 5192
+        if itemtype = 17083
             if find item backpack 1779
                 say 'AEGIS KEEP MINI TOKEN SECURED!'
             elseif find item backpack 2338
@@ -742,7 +779,7 @@ foreach itemtype in taxlist
         endif
         if itemtype = 5192
             if find item backpack 1779
-            say 'AEGIS KEEP MAIN TOKEN SECURED!'
+                say 'AEGIS KEEP MAIN TOKEN SECURED!'
             elseif find item backpack 2338
                 say "CAVERNAM MAIN TOKEN SECURED!"
             elseif find item backpack 2099
@@ -754,11 +791,11 @@ foreach itemtype in taxlist
             elseif find item backpack 2089
                 say "MOUNT PETRAM MAIN TOKEN SECURED!"
             elseif find item backpack 2796
-                say "NUSERO MINI MAIN SECURED!"
+                say "NUSERO MAIN TOKEN SECURED!"
             elseif find item backpack 2091
-                say "OSSUARY MAIN SECURED!"
+                say "OSSUARY MAIN TOKEN SECURED!"
             elseif find item backpack 2085
-                say "PULMA MAIN SECURED!"
+                say "PULMA MAIN TOKEN SECURED!"
             elseif find item backpack 2093
                 say "SHADOWSPIRE MAIN TOKEN SECURED!"
             elseif find item backpack 2092
@@ -766,7 +803,7 @@ foreach itemtype in taxlist
             elseif find item backpack 1688
                 say "TIDAL TOMB MAIN TOKEN SECURED!"
             elseif find item backpack 1183
-                say "OCEAN TOKEN MAIN SECURED!"
+                say "OCEAN MAIN TOKEN SECURED!"
             elseif find item backpack 1182
                 say "WILDERNESS MAIN TOKEN SECURED!"
             endif
@@ -779,8 +816,7 @@ foreach itemtype in taxlist
     while findtype itemtype BDOInbox as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
-        if itemtype = 17083 
-            //or itemtype = 5192
+        if itemtype = 17083
             if find item BDOInbox 1779
                 say 'AEGIS KEEP MINI TOKEN SECURED!'
             elseif find item BDOInbox 2338
@@ -813,7 +849,7 @@ foreach itemtype in taxlist
         endif
         if itemtype = 5192
             if find item BDOInbox 1779
-            say 'AEGIS KEEP MAIN TOKEN SECURED!'
+                say 'AEGIS KEEP MAIN TOKEN SECURED!'
             elseif find item BDOInbox 2338
                 say "CAVERNAM MAIN TOKEN SECURED!"
             elseif find item BDOInbox 2099
@@ -825,11 +861,11 @@ foreach itemtype in taxlist
             elseif find item BDOInbox 2089
                 say "MOUNT PETRAM MAIN TOKEN SECURED!"
             elseif find item BDOInbox 2796
-                say "NUSERO MINI MAIN SECURED!"
+                say "NUSERO MAIN TOKEN SECURED!"
             elseif find item BDOInbox 2091
-                say "OSSUARY MAIN SECURED!"
+                say "OSSUARY MAIN TOKEN SECURED!"
             elseif find item BDOInbox 2085
-                say "PULMA MAIN SECURED!"
+                say "PULMA MAIN TOKEN SECURED!"
             elseif find item BDOInbox 2093
                 say "SHADOWSPIRE MAIN TOKEN SECURED!"
             elseif find item BDOInbox 2092
@@ -837,7 +873,7 @@ foreach itemtype in taxlist
             elseif find item BDOInbox 1688
                 say "TIDAL TOMB MAIN TOKEN SECURED!"
             elseif find item BDOInbox 1183
-                say "OCEAN TOKEN MAIN SECURED!"
+                say "OCEAN MAIN TOKEN SECURED!"
             elseif find item BDOInbox 1182
                 say "WILDERNESS MAIN TOKEN SECURED!"
             endif
@@ -847,34 +883,13 @@ foreach itemtype in taxlist
         drop BDONCOtop -1 -1 -1
         wait 500
     endwhile
-endfor 
-
-#pushlist taxlist 17083
-#pushlist taxlist 5192
-#            
-#pushlist TokensList 1779
-#pushlist TokensList 2338
-#pushlist TokensList 2099
-#pushlist TokensList 1909
-#pushlist TokensList 2841
-#pushlist TokensList 2089
-#pushlist TokensList 2796
-#pushlist TokensList 2091
-#pushlist TokensList 2085
-#pushlist TokensList 2093 
-#pushlist TokensList 2092 
-#pushlist TokensList 1688  
-#pushlist TokensList 1183
-#pushlist TokensList 1182
-#
-
-
+endfor
 
 @clearignore
 
 overhead 'DROP OFF COMPLETE!' 14
 
-if split = 1 and BDOsplit = 1
+if split = 1 and varexist BDOsplit and BDOsplit = 1
     sysmsg "Splitting Mini-Rares into distro chest" 14
     getlabel BDODistroOne lblone
     getlabel BDODistroTwo lbltwo
@@ -885,13 +900,13 @@ if split = 1 and BDOsplit = 1
         @setvar BDODistro BDODistroTwo
     elseif "(0 items" in lblthree
         @setvar BDODistro BDODistroThree
-    else 
+    else
         sysmsg "No empty distros to split minirares into" 44
         @setvar BDODistro 0
     endif
     if BDODistro != 0
         foreach itemtype in minirarelist
-            #distro chests do not automatically split aracne scrolls
+            #distro chests do not automatically split arcane scrolls
             if itemtype = 3827
                 while findtype itemtype BDONCObottomMini as item
                     getlabel item lbl
@@ -902,7 +917,7 @@ if split = 1 and BDOsplit = 1
                     wait 500
                 endwhile
             else
-                while findtype itemtype BDONCObottomMini as item 
+                while findtype itemtype BDONCObottomMini as item
                     getlabel item lbl
                     sysmsg "{{item}} {{lbl}}" 818
                     lift item 60000
@@ -911,61 +926,18 @@ if split = 1 and BDOsplit = 1
                     wait 500
                 endwhile
             endif
-        endfor 
+        endfor
     endif
     @setvar BDOsplit 0
 endif
 
-removelist stackcheck
-createlist stackcheck
-#arcane scrolls
-pushlist stackcheck 3827
-
 if verify = 1
-    #sysmsg "Checking for stacked arcane scrolls Distros" 14
-#    foreach itemtype in rarelist
-#        #sysmsg "{{itemtype}}"
-#        while findtype itemtype BDODistroOne as item
-#            getlabel item lbl
-#            sysmsg "{{item}} {{lbl}}" 818
-#            if " : " in lbl
-#                lift item 10000 500
-#                wait 200
-#                drop BDOInbox -1 -1 -1
-#                wait 500
-#            endif
-#            @ignore item
-#        endwhile
-#        while findtype itemtype BDODistroTwo as item
-#            getlabel item lbl
-#            sysmsg "{{item}} {{lbl}}" 818
-#            if " : " in lbl
-#                lift item 10000 500
-#                wait 200
-#                drop BDOInbox -1 -1 -1
-#                wait 500
-#            endif
-#            @ignore item
-#        endwhile
-#        while findtype itemtype BDODistroThree as item
-#            getlabel item lbl
-#            sysmsg "{{item}} {{lbl}}" 818
-#            if " : " in lbl
-#                lift item 10000 500
-#                wait 200
-#                drop BDOInbox -1 -1 -1
-#                wait 500
-#            endif
-#            @ignore item
-#        endwhile
-#    endfor 
     sysmsg "Checking for non-distro items in Distros" 14
     foreach itemtype in nondistrolist
-        #sysmsg "{{itemtype}}"
         while findtype itemtype BDODistroOne as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
-            lift item 99
+            lift item 60000
             wait 200
             drop BDONCOtop -1 -1 -1
             wait 500
@@ -974,7 +946,7 @@ if verify = 1
         while findtype itemtype BDODistroTwo as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
-            lift item 99
+            lift item 60000
             wait 200
             drop BDONCOtop -1 -1 -1
             wait 500
@@ -983,51 +955,48 @@ if verify = 1
         while findtype itemtype BDODistroThree as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
-            lift item 99
+            lift item 60000
             wait 200
             drop BDONCOtop -1 -1 -1
             wait 500
             @ignore item
         endwhile
-    endfor 
+    endfor
     sysmsg "Checking for T8s in Distros" 14
-    foreach itemtype in nondistrolist
-        #sysmsg "{{itemtype}}"
-        while findtype 5356 BDODistroOne 2091 as item
-            getlabel item lbl
-            sysmsg "{{item}} {{lbl}}" 818
-            lift item 99
-            wait 200
-            drop BDONCOtop -1 -1 -1
-            wait 500
-            @ignore item
-        endwhile
-        while findtype 5356 BDODistroTwo 2091 as item
-            getlabel item lbl
-            sysmsg "{{item}} {{lbl}}" 818
-            lift item 99
-            wait 200
-            drop BDONCOtop -1 -1 -1
-            wait 500
-            @ignore item
-        endwhile
-        while findtype 5356 BDODistroThree 2091 as item
-            getlabel item lbl
-            sysmsg "{{item}} {{lbl}}" 818
-            lift item 99
-            wait 200
-            drop BDONCOtop -1 -1 -1
-            wait 500
-            @ignore item
-        endwhile
-    endfor 
+    while findtype 5356 BDODistroOne 2091 as item
+        getlabel item lbl
+        sysmsg "{{item}} {{lbl}}" 818
+        lift item 60000
+        wait 200
+        drop BDONCOtop -1 -1 -1
+        wait 500
+        @ignore item
+    endwhile
+    while findtype 5356 BDODistroTwo 2091 as item
+        getlabel item lbl
+        sysmsg "{{item}} {{lbl}}" 818
+        lift item 60000
+        wait 200
+        drop BDONCOtop -1 -1 -1
+        wait 500
+        @ignore item
+    endwhile
+    while findtype 5356 BDODistroThree 2091 as item
+        getlabel item lbl
+        sysmsg "{{item}} {{lbl}}" 818
+        lift item 60000
+        wait 200
+        drop BDONCOtop -1 -1 -1
+        wait 500
+        @ignore item
+    endwhile
     sysmsg "Check Complete" 14
     #take runes out of drop of chest
     while findtype 39889|39891|39892|39896|39897|39898|39905|39909|39911|39912|39916|39917|39918 BDOInbox as myrune
         lift myrune 10
         if findtype 3702 backpack as mybag
             drop mybag 100 100
-        else 
+        else
             drop self -1 -1 -1
         endif
         @ignore myrune
@@ -1035,7 +1004,7 @@ if verify = 1
     if storeArcaneRunes = 1
         if find BDONCOtop ground -1 -1 2 as Box
             dclick Box
-    if findtype 70158 BDONCOtop 2085 1 2 as tomearcane
+            if findtype 70158 BDONCOtop 2085 1 2 as tomearcane
                 menu tomearcane 0
             endif
         endif
@@ -1061,7 +1030,7 @@ if verify = 1
         waitforgump 2865667423
     else
         sysmsg "Inbox not empty, restarting" 14
-        @clearignore 
+        @clearignore
         replay
     endif
 endif
