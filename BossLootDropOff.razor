@@ -26,7 +26,7 @@
 #
 # HOW LOOT FLOWS (backpack and CFC Public Chest are both emptied):
 #   CFC Public Chest / backpack
-#     -> rares, rare cloth, accessory dye, maps, gold -> Distro One (overflow: Two, then Three)
+#     -> rares, rare cloth, accessory dye, maps, gold -> Distro One (overflow: Distro Two)
 #     -> mini-rares                                    -> Distro Two
 #     -> boss tokens, tax items, legendary T8 maps    -> NCO main
 #     -> raw resources                                 -> NCO resources chest (inside NCO main)
@@ -39,16 +39,11 @@
 # At the end the script opens its distribution gump so YOU hand the loot out to the players.
 # Must be a 'distribution chest'.
 @setvar! CFG_DistroOne 0x4630999E
-# --- DISTRO TWO: mini-rares and first overflow ---
+# --- DISTRO TWO: mini-rares and overflow ---
 # Always gets the mini-rares: arcane scrolls (stacks of 5, if not taxed), plant chemicals,
 # phylacteries, carpet dye, melloweed leaves, mount gear dye.
 # Also gets Distro One's loot when Distro One is full.
 @setvar! CFG_DistroTwo 0x40FD50C6
-# --- DISTRO THREE: "lesser loot" distro and last overflow ---
-# Gets loot only when Distro One and Two are full.
-# At the end, after [bossresults, the script distributes this chest AUTOMATICALLY
-# (clicks button 6 twice in its gump) and waits for the result list before opening Distro One.
-@setvar! CFG_DistroThree 0x443EA34F
 # --- CFC PUBLIC CHEST: drop-off chest where members put their boss loot ---
 # Anyone in the group should be able to drop into it. The script empties it completely;
 # arcane runes are taken out into your backpack. The final distribution only starts when
@@ -170,28 +165,6 @@ elseif not varexist BDODistroTwo or not find BDODistroTwo ground -1 -1 2
         wait 500
         overhead 'Distro two set!' 14
         dclick BDODistroTwo
-        wait 500
-    else
-        overhead 'Wrong chest or too far away!' 44
-        replay
-    endif
-endif
-
-if CFG_DistroThree != 0 and find CFG_DistroThree ground -1 -1 2
-    @setvar BDODistroThree CFG_DistroThree
-elseif not varexist BDODistroThree or not find BDODistroThree ground -1 -1 2
-    overhead 'Select distro three'
-    hotkey 'Clear Target Queue'
-    @setvar BDODistroThree
-    wft 500
-    while targetexists
-        wait 100
-    endwhile
-    getlabel BDODistroThree lbl
-    if find BDODistroThree ground any any 2 and 'distribution chest' in lbl
-        wait 500
-        overhead 'Distro three set!' 14
-        dclick BDODistroThree
         wait 500
     else
         overhead 'Wrong chest or too far away!' 44
@@ -421,9 +394,6 @@ foreach itemtype in rarelist
                 sysmsg "Distro One full, switching to Distro two."
                 @setvar BDODistro BDODistroTwo
             elseif BDODistro = BDODistroTwo
-                sysmsg "Distro Two full, switching to Distro three."
-                @setvar BDODistro BDODistroThree
-            elseif BDODistro = BDODistroThree
                 overhead "All Distros full!"
                 stop
             endif
@@ -442,9 +412,6 @@ foreach itemtype in rarelist
                 sysmsg "Distro One full, switching to Distro two."
                 @setvar BDODistro BDODistroTwo
             elseif BDODistro = BDODistroTwo
-                sysmsg "Distro Two full, switching to Distro three."
-                @setvar BDODistro BDODistroThree
-            elseif BDODistro = BDODistroThree
                 overhead "All Distros full!"
                 stop
             endif
@@ -492,9 +459,6 @@ while findtype 5981|3843 backpack as item
             sysmsg "Distro One full, switching to Distro two."
             @setvar BDODistro BDODistroTwo
         elseif BDODistro = BDODistroTwo
-            sysmsg "Distro Two full, switching to Distro three."
-            @setvar BDODistro BDODistroThree
-        elseif BDODistro = BDODistroThree
             overhead "All Distros full!"
             stop
         endif
@@ -513,9 +477,6 @@ while findtype 5981|3843 BDOPublicChest as item
             sysmsg "Distro One full, switching to Distro two."
             @setvar BDODistro BDODistroTwo
         elseif BDODistro = BDODistroTwo
-            sysmsg "Distro Two full, switching to Distro three."
-            @setvar BDODistro BDODistroThree
-        elseif BDODistro = BDODistroThree
             overhead "All Distros full!"
             stop
         endif
@@ -623,9 +584,6 @@ foreach type in maptypes
                 sysmsg "Distro One full, switching to Distro two."
                 @setvar BDODistro BDODistroTwo
             elseif BDODistro = BDODistroTwo
-                sysmsg "Distro Two full, switching to Distro three."
-                @setvar BDODistro BDODistroThree
-            elseif BDODistro = BDODistroThree
                 overhead "All Distros full!"
                 stop
             endif
@@ -644,9 +602,6 @@ foreach type in maptypes
                 sysmsg "Distro One full, switching to Distro two."
                 @setvar BDODistro BDODistroTwo
             elseif BDODistro = BDODistroTwo
-                sysmsg "Distro Two full, switching to Distro three."
-                @setvar BDODistro BDODistroThree
-            elseif BDODistro = BDODistroThree
                 overhead "All Distros full!"
                 stop
             endif
@@ -669,9 +624,6 @@ foreach itemtype in goldlist
                 sysmsg "Distro One full, switching to Distro two."
                 @setvar BDODistro BDODistroTwo
             elseif BDODistro = BDODistroTwo
-                sysmsg "Distro Two full, switching to Distro three."
-                @setvar BDODistro BDODistroThree
-            elseif BDODistro = BDODistroThree
                 overhead "All Distros full!"
                 stop
             endif
@@ -690,9 +642,6 @@ foreach itemtype in goldlist
                 sysmsg "Distro One full, switching to Distro two."
                 @setvar BDODistro BDODistroTwo
             elseif BDODistro = BDODistroTwo
-                sysmsg "Distro Two full, switching to Distro three."
-                @setvar BDODistro BDODistroThree
-            elseif BDODistro = BDODistroThree
                 overhead "All Distros full!"
                 stop
             endif
@@ -872,13 +821,10 @@ if split = 1 and varexist BDOsplit and BDOsplit = 1
     sysmsg "Splitting Mini-Rares into distro chest" 14
     getlabel BDODistroOne lblone
     getlabel BDODistroTwo lbltwo
-    getlabel BDODistroThree lblthree
     if "(0 items" in lblone
         @setvar BDODistro BDODistroOne
     elseif "(0 items" in lbltwo
         @setvar BDODistro BDODistroTwo
-    elseif "(0 items" in lblthree
-        @setvar BDODistro BDODistroThree
     else
         sysmsg "No empty distros to split minirares into" 44
         @setvar BDODistro 0
@@ -931,15 +877,6 @@ if verify = 1
             wait 500
             @ignore item
         endwhile
-        while findtype itemtype BDODistroThree as item
-            getlabel item lbl
-            sysmsg "{{item}} {{lbl}}" 818
-            lift item 60000
-            wait 200
-            drop BDONCOmain -1 -1 -1
-            wait 500
-            @ignore item
-        endwhile
     endfor
     sysmsg "Checking for T8s in Distros" 14
     while findtype 5356 BDODistroOne 2091 as item
@@ -952,15 +889,6 @@ if verify = 1
         @ignore item
     endwhile
     while findtype 5356 BDODistroTwo 2091 as item
-        getlabel item lbl
-        sysmsg "{{item}} {{lbl}}" 818
-        lift item 60000
-        wait 200
-        drop BDONCOmain -1 -1 -1
-        wait 500
-        @ignore item
-    endwhile
-    while findtype 5356 BDODistroThree 2091 as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
         lift item 60000
@@ -993,18 +921,7 @@ if verify = 1
         #ok
         say '[bossresults'
         waitforgump 1892293155
-        dclick BDODistroThree
-        waitforgump 2865667423
-        gumpresponse 6 2865667423
-        waitforgump 2865667423
-        gumpresponse 6 2865667423
-        waitforgump 2865667423
-        while not gumpexists 1747077573
-            wait 5000
-            sysmsg "waiting for distro of lesser loot" 818
-        endwhile
-        #distroresultlist
-        #waitforgump 1747077573
+        #open Distro One so you can hand out the loot from Distro One and Two
         dclick BDODistroOne
         waitforgump 2865667423
     else
