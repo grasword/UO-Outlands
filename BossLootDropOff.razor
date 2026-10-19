@@ -1,143 +1,245 @@
-#Bossloot-drop-off-Single by Stephanius 2026/08/11
-#adapted from Templer s drop-off script
-#changes for distro chest patch
-# - move gold into distros, stacking it, not anymore into the gold box in the NCO chest
-# - move rares into distros in stacks, stacking them, no longer splitting them into 1s
-# - not checking for stacked rares anymore
-# - mini-Rares, including arcane scrolls, are moved into the distro as a full stack (the distro chest splits them).
-# - CFC: removed the mini-loot chest and the split option.
-# - added tax switch for RMs
-# This should run faster and cause less problems since there are less lift and drop pairs.
-#Removed section checking for stacked rares in Distro, it was commented out, but did execute for me.
-#Adapted for CFC: all guild containers are configured in the GUILD CONTAINERS section below (CFC_... values).
+###########################################################################
+# CFC BOSS LOOT DROP-OFF
+# Empties your backpack and the CFC Public Chest into the guild distros and
+# storage, then starts [bossresults and opens Distro One for you to hand out.
+# Based on Stephanius' YEW boss loot drop-off (adapted from Templer's script).
+#
+# Where the loot goes:
+#   rares, rare cloth, maps, gold  -> Distro One (Distro Two when One is full)
+#   mini-rares                     -> Distro Two
+#   boss tokens                    -> Boss tokens container
+#   tax items, legendary T8 maps   -> NCO main
+#   raw resources                  -> NCO resources
+#   unidentified magic items       -> recycler
+#
+# Before the first run, set the serials below and check them with
+# CheckContainers.razor.
+###########################################################################
 
 @clearignore
 
-### GUILD CONTAINERS ###
-# Serials of your guild's containers. Use >info in game to get a container's serial.
-# Set a value to 0 and the script will ask you to target that container instead.
-# The chosen containers are remembered (BDO... variables) until they are out of range.
-#
-# ROOM LAYOUT: stand where every chest below is within 2 tiles of you.
-# You also need, within reach:
-# - an item recycler (found automatically by type, the script STOPS without one)
-# - optional "tax switches": lock down a Master Crafting Diagram, a pink Arcane Scroll
-#   or Research Materials within 8 tiles to make that item a guild tax item
-#   (it then goes to the NCO main chest instead of a distro)
-#
-# HOW LOOT FLOWS (backpack and CFC Public Chest are both emptied):
-#   CFC Public Chest / backpack
-#     -> rares, rare cloth, accessory dye, maps, gold -> Distro One (overflow: Distro Two)
-#     -> mini-rares                                    -> Distro Two
-#     -> boss tokens                                  -> Boss tokens container
-#     -> tax items, legendary T8 maps                 -> NCO main
-#     -> raw resources                                 -> NCO resources chest (inside NCO main)
-#     -> unidentified magic items                      -> recycler
-#
-# --- DISTRO ONE: main boss loot distro ---
-# Gets the valuable loot: aspect cores, distillations, skill orbs and scrolls, survival gear,
-# spell hue deeds, dungeon seeds, dyes, carpet tiles, MCDs/RMs (if not taxed), rare cloth,
-# accessory dye, treasure and resource maps, gold, checks and doubloons.
-# At the end the script opens its distribution gump so YOU hand the loot out to the players.
-# Must be a 'distribution chest'.
+### CONTAINERS ###
+# Get a serial with >info in game. Set 0 to target the chest when the script runs.
+# Stand where every chest is within 2 tiles of you, with an item recycler nearby.
+
+# Distro One: main boss loot. Opened at the end so you can hand it out.
 @setvar! CFC_DistroOne 0x4630999E
-# --- DISTRO TWO: mini-rares and overflow ---
-# Always gets the mini-rares: arcane scrolls (if not taxed), plant chemicals,
-# phylacteries, carpet dye, melloweed leaves, mount gear dye.
-# Also gets Distro One's loot when Distro One is full.
+# Distro Two: mini-rares, and Distro One's loot when One is full.
 @setvar! CFC_DistroTwo 0x40FD50C6
-# --- CFC PUBLIC CHEST: drop-off chest where members put their boss loot ---
-# Anyone in the group should be able to drop into it. The script empties it completely;
-# arcane runes are taken out into your backpack. The final distribution only starts when
-# the CFC Public Chest shows "(0 items", otherwise the script starts over.
+# CFC Public Chest: members drop their boss loot here. The script empties it.
 @setvar! CFC_PublicChest 0x583561C4
-# --- NCO MAIN: secure guild storage for things that are NOT distributed ---
-# Gets arcane essence, mastery chain links (and boss tokens if there is no token container),
-# legendary T8 treasure maps (hue 2091), MCDs/RMs/arcane scrolls when taxed,
-# and any resources/tax items found in the distros by the verify step.
-# It must also contain the NCO resources chest below,
-# and the arcane rune tome if storeArcaneRunes = 1.
+# NCO main: guild storage for tax items and legendary T8 maps.
+# The NCO resources chest and the rune tome must be inside it.
 @setvar! CFC_NCOmain 0x4F59860E
-# --- ARCANE RUNE TOME: INSIDE NCO main, only used when storeArcaneRunes = 1 ---
-# Boss runes from your backpack and the CFC Public Chest are added to it.
-# Set to 0 to search NCO main for a rune tome (item 70158, hue 2085) instead.
-@setvar! CFC_RuneTome 0x42CBB047
-# --- BOSS TOKENS: container for boss tokens (main and mini) ---
-# Can be inside NCO main or a chest within 2 tiles. Set to 0 to keep tokens in NCO main.
-@setvar! CFC_Tokens 0x42244475
-# --- NCO RESOURCES: chest INSIDE NCO main ---
-# Gets raw food, leather, ingots, boards and seeds.
+# NCO resources: inside NCO main, gets raw food, leather, ingots, boards and seeds.
 @setvar! CFC_NCOresources 0x4871BAC2
+# Rune tome: inside NCO main. 0 = look for a rune tome with hue 2085.
+@setvar! CFC_RuneTome 0x42CBB047
+# Boss tokens: inside NCO main or within 2 tiles. 0 = tokens go to NCO main.
+@setvar! CFC_Tokens 0x42244475
 
 ### OPTIONS ###
-# If you want to drop off Arcane Runes, set to 1.
-@setvar! storeArcaneRunes 1
-# If you want to auto recycle magic items when recycler is full, set to 1.
+# 1 = put arcane runes into the rune tome
+@setvar! storeArcaneRunes 0
+# 1 = empty the recycler when it is full
 @setvar! autoRecycle 1
-#If you want to check the distros for stacked items, set to 1
+# 1 = at the end: move tax items and resources out of the distros, take runes
+#     out of the CFC Public Chest and start [bossresults
 @setvar! verify 1
-#this adds leather to the rares list for testing purposes, set to 1
+# 1 = treat leather as distro loot (for testing)
 @setvar! debug 0
-#TEMPORARY: while testing, your character says a warning in chat at the start, set to 0 to turn off
+# 1 = your character warns in chat that the script is being tested (temporary)
 @setvar! testAnnounce 1
-#checks for MCDs and Arcane Scrolls on the ground to determine if those should be tax or distro items
-if findtype 17087 ground 0 any 8 as MCD
-    sysmsg "Found MCD on ground, adding MCD to guild tax items" 818
-    @setvar! taxMCDs 1
-else
-    @setvar! taxMCDs 0
-endif
-if findtype 3827 ground 2609 any 8 as pinkscrolls
-    sysmsg "Found arcane scroll on ground, adding arcane scroll to guild tax items" 818
-    @setvar! taxPinkScrolls 1
-else
-    @setvar! taxPinkScrolls 0
-endif
-if findtype 24434 ground 0 any 8 as researchmats
-    sysmsg "Found research materials on ground, adding RMs to guild tax items" 818
-    @setvar! taxRMs 1
-else
-    @setvar! taxRMs 0
-endif
 
-sysmsg 'BOSSLOOT-DROP-OFF Started _BosslootDropOffSingle' 44
+### TAX ###
+# Tax items are kept by the guild in NCO main instead of being handed out.
+# Arcane essence and mastery chain links are always taxed (see taxList).
+# 1 = tax master crafting diagrams, 0 = hand them out (Distro One)
+@setvar! taxMCDs 0
+# 1 = tax pink arcane scrolls, 0 = hand them out (Distro Two)
+@setvar! taxPinkScrolls 0
+# 1 = tax research materials, 0 = hand them out (Distro One)
+@setvar! taxRMs 0
+
+sysmsg 'BOSS LOOT DROP-OFF started' 44
 if testAnnounce = 1
     say 'Testing drop off script, please use bottom distro if needed'
 endif
 
-# Magic items to Recycler (and auto recycle if you have it set to 1 at start)
+### ITEM LISTS ###
+
+# Distro loot: goes to Distro One (Distro Two when One is full)
+removelist distroLootList
+createlist distroLootList
+# Aspect cores
+pushlist distroLootList 3985|4025
+# Aspect distillations
+pushlist distroLootList 17686|4026
+# Skill orbs
+pushlist distroLootList 22336
+# Skill scrolls
+pushlist distroLootList 8826
+# Survival gear
+pushlist distroLootList 37181
+# Master crafting diagrams
+if taxMCDs = 0
+    pushlist distroLootList 17087
+endif
+# Research materials
+if taxRMs = 0
+    pushlist distroLootList 24434
+endif
+# Spell hue deeds
+pushlist distroLootList 11858
+# Dungeon seeds
+pushlist distroLootList 51098
+# Furniture dye
+pushlist distroLootList 29025
+# Mastery chain dye
+pushlist distroLootList 29034
+# Headwear dye
+pushlist distroLootList 3842
+# Runebook dye
+pushlist distroLootList 3838
+# Backpack dye
+pushlist distroLootList 3839
+# Carpet tiles
+pushlist distroLootList 48407|4248|43165|43166
+# Checks
+pushlist distroLootList 5360
+# Gold coins
+pushlist distroLootList 3821
+# Doubloons
+pushlist distroLootList 3891
+if debug = 1
+    # Leather, for testing
+    pushlist distroLootList 4225
+endif
+
+# Mini-rares: go to Distro Two
+removelist miniRareList
+createlist miniRareList
+# Arcane scrolls (only the pink ones, hue 2609)
+if taxPinkScrolls = 0
+    pushlist miniRareList 3827
+endif
+# Plant chemicals
+pushlist miniRareList 29030
+# Phylacteries
+pushlist miniRareList 576
+# Carpet dye
+pushlist miniRareList 29036
+# Melloweed leaves
+pushlist miniRareList 51094
+# Mount gear dye
+pushlist miniRareList 15296
+
+# Maps: go to the distro one at a time (legendary T8 maps are moved to NCO main first)
+removelist mapList
+createlist mapList
+# Fishing map
+pushlist mapList 70148
+# Lumber map
+pushlist mapList 70151
+# Ore map
+pushlist mapList 70154
+# Skinning map
+pushlist mapList 70157
+# Treasure map
+pushlist mapList 5356
+
+# Resources: go to NCO resources
+removelist resourceList
+createlist resourceList
+# Raw food
+pushlist resourceList 515|2422|2426|2489|2496|2515|2545|5639|5641|7708|7711|17617|17619
+# Leather
+pushlist resourceList 4225
+# Ingots
+pushlist resourceList 7154
+# Boards
+pushlist resourceList 7127
+# Seeds
+pushlist resourceList 22326
+
+# Boss tokens: go to the Boss tokens container
+removelist tokenList
+createlist tokenList
+# Mini boss token
+pushlist tokenList 17083
+# Main boss token
+pushlist tokenList 5192
+
+# Tax items: go to NCO main
+removelist taxList
+createlist taxList
+# Arcane essence
+pushlist taxList 3901
+# Mastery chain links
+pushlist taxList 43206
+if taxMCDs = 1
+    pushlist taxList 17087
+endif
+if taxRMs = 1
+    pushlist taxList 24434
+endif
+if taxPinkScrolls = 1
+    pushlist taxList 3827
+endif
+
+# Everything that must never stay in a distro (checked by the verify step)
+removelist nonDistroList
+createlist nonDistroList
+foreach entry in resourceList
+    pushlist nonDistroList entry
+endfor
+foreach entry in tokenList
+    pushlist nonDistroList entry
+endfor
+foreach entry in taxList
+    pushlist nonDistroList entry
+endfor
+
+### RECYCLER ###
+# Unidentified magic items go into the recycler, which is emptied when full.
+
 if findtype '57484|57495|11761|11762' true as 'recycler'
     sysmsg 'Depositing unidentified items...' 14
     menu 'recycler' 1
-        wait 1000
-        if autoRecycle = 1
-            getlabel recycler reclabel
-            overhead reclabel 53
-            if "(125 items," in reclabel
-                overhead "Recycler full" 44
-                dclick recycler
-                wait 500
-                waitforgump 4045111101
-                gumpresponse 7
-                waitforgump 4045111101
-                gumpresponse 6
-                waitforgump 4045111101
-                gumpresponse 6
-                waitforgump 4045111101
-                gumpclose
-                menu 'recycler' 1
-                wait 1000
-            endif
+    wait 1000
+    if autoRecycle = 1
+        getlabel recycler reclabel
+        overhead reclabel 53
+        if "(125 items," in reclabel
+            overhead "Recycler full" 44
+            dclick recycler
+            wait 500
+            waitforgump 4045111101
+            gumpresponse 7
+            waitforgump 4045111101
+            gumpresponse 6
+            waitforgump 4045111101
+            gumpresponse 6
+            waitforgump 4045111101
+            gumpclose
+            menu 'recycler' 1
+            wait 1000
         endif
+    endif
 else
     sysmsg 'ITEM RECYCLER NOT FOUND. STOPPING.' 44
     stop
 endif
 
+### CONTAINER SETUP ###
+# Uses the serial from CONTAINERS when that chest is in range. Otherwise uses the
+# chest picked on an earlier run (BDO... variables), or asks you to target it.
+
+# Distro One
 if CFC_DistroOne != 0 and find CFC_DistroOne ground -1 -1 2
     @setvar BDODistroOne CFC_DistroOne
 elseif not varexist BDODistroOne or not find BDODistroOne ground -1 -1 2
-    overhead 'Select distro one'
+    overhead 'Select Distro One'
     hotkey 'Clear Target Queue'
     @setvar BDODistroOne
     wft 500
@@ -147,7 +249,7 @@ elseif not varexist BDODistroOne or not find BDODistroOne ground -1 -1 2
     getlabel BDODistroOne lbl
     if find BDODistroOne ground any any 2 and 'distribution chest' in lbl
         wait 500
-        overhead 'Distro one set!' 14
+        overhead 'Distro One set!' 14
         dclick BDODistroOne
         wait 500
     else
@@ -156,10 +258,11 @@ elseif not varexist BDODistroOne or not find BDODistroOne ground -1 -1 2
     endif
 endif
 
+# Distro Two
 if CFC_DistroTwo != 0 and find CFC_DistroTwo ground -1 -1 2
     @setvar BDODistroTwo CFC_DistroTwo
 elseif not varexist BDODistroTwo or not find BDODistroTwo ground -1 -1 2
-    overhead 'Select distro two'
+    overhead 'Select Distro Two'
     hotkey 'Clear Target Queue'
     @setvar BDODistroTwo
     wft 500
@@ -169,7 +272,7 @@ elseif not varexist BDODistroTwo or not find BDODistroTwo ground -1 -1 2
     getlabel BDODistroTwo lbl
     if find BDODistroTwo ground any any 2 and 'distribution chest' in lbl
         wait 500
-        overhead 'Distro two set!' 14
+        overhead 'Distro Two set!' 14
         dclick BDODistroTwo
         wait 500
     else
@@ -178,6 +281,7 @@ elseif not varexist BDODistroTwo or not find BDODistroTwo ground -1 -1 2
     endif
 endif
 
+# CFC Public Chest
 if CFC_PublicChest != 0 and find CFC_PublicChest ground -1 -1 2
     @setvar BDOPublicChest CFC_PublicChest
 elseif not varexist BDOPublicChest or not find BDOPublicChest ground -1 -1 2
@@ -198,6 +302,7 @@ elseif not varexist BDOPublicChest or not find BDOPublicChest ground -1 -1 2
     endif
 endif
 
+# NCO main
 if CFC_NCOmain != 0 and find CFC_NCOmain ground -1 -1 2
     @setvar BDONCOmain CFC_NCOmain
 elseif not varexist BDONCOmain or not find BDONCOmain ground -1 -1 2
@@ -218,11 +323,21 @@ elseif not varexist BDONCOmain or not find BDONCOmain ground -1 -1 2
     endif
 endif
 
-#open NCO main so the chest and the rune tome inside it can be found
+# Open NCO main so the chest and the rune tome inside it can be found
 dclick BDONCOmain
 wait 500
 
-#Arcane rune tome
+# NCO resources (inside NCO main)
+if CFC_NCOresources != 0 and find CFC_NCOresources BDONCOmain
+    @setvar BDONCOresources CFC_NCOresources
+elseif not varexist BDONCOresources or not find BDONCOresources BDONCOmain
+    while not find BDONCOresources BDONCOmain
+        overhead "Select NCO resources chest"
+        @setvar BDONCOresources
+    endwhile
+endif
+
+# Rune tome (inside NCO main)
 @setvar! BDORuneTome 0
 if storeArcaneRunes = 1
     if CFC_RuneTome != 0 and find CFC_RuneTome BDONCOmain
@@ -234,23 +349,7 @@ if storeArcaneRunes = 1
     endif
 endif
 
-# Arcane Runes to the Rune Tome in NCO main chest
-if BDORuneTome != 0 and findtype 'rune' backpack
-    overhead 'Putting away boss runes...' 44
-    menu BDORuneTome 0
-endif
-
-#NCO resources chest
-if CFC_NCOresources != 0 and find CFC_NCOresources BDONCOmain
-    @setvar BDONCOresources CFC_NCOresources
-elseif not varexist BDONCOresources or not find BDONCOresources BDONCOmain
-    while not find BDONCOresources BDONCOmain
-        overhead "Select NCO resources chest"
-        @setvar BDONCOresources
-    endwhile
-endif
-
-#Boss token container, tokens go to NCO main if it is not found
+# Boss tokens container, falls back to NCO main
 @setvar! BDOTokens BDONCOmain
 if CFC_Tokens != 0
     if find CFC_Tokens BDONCOmain or find CFC_Tokens ground -1 -1 2
@@ -260,141 +359,21 @@ if CFC_Tokens != 0
     endif
 endif
 
-removelist minirarelist
-createlist minirarelist
-
-#Arcane Scrolls
-if taxPinkScrolls = 0
-    pushlist minirarelist 3827
-endif
-#Plant Chemicals
-pushlist minirarelist 29030
-#Phylacteries
-pushlist minirarelist 576
-#Carpet Dye
-pushlist minirarelist 29036
-#Accessory Dye
-#pushlist minirarelist 3843
-#Melloweed Leaves
-pushlist minirarelist 51094
-#mount gear dye
-pushlist minirarelist 15296
-
-removelist rarelist
-createlist rarelist
-
-#Aspect Cores
-pushlist rarelist 3985|4025
-#Distillations
-pushlist rarelist 17686|4026
-#Skill Orbs
-pushlist rarelist 22336
-#Skill Scrolls
-pushlist rarelist 8826
-#Survival Gear
-pushlist rarelist 37181
-#Mastercrafting Diagrams
-if taxMCDs = 0
-    pushlist rarelist 17087
-endif
-#Spell Hue Deeds
-pushlist rarelist 11858
-#Dungeon Seeds
-pushlist rarelist 51098
-#(Facial) Hair Dye
-#pushlist rarelist 3843
-#Furniture Dye
-pushlist rarelist 29025
-#Mastery Chain Dye
-pushlist rarelist 29034
-#Headwear Dye
-pushlist rarelist 3842
-#Runebook Dye
-pushlist rarelist 3838
-#Backpack Dye
-pushlist rarelist 3839
-#Carpet Tiles
-pushlist rarelist 48407|4248|43165|43166
-if taxRMs = 0
-    #research
-    pushlist rarelist 24434
-endif
-#Lanterns
-#pushlist rarelist 2597
-#Rare Cloth
-#pushlist rarelist 5981
-
-#Treasure maps/Resource maps
-#pushlist rarelist 5356
-if debug = 1
-    #test leather
-    pushlist rarelist 4225
-endif
-
-removelist resourcelist
-createlist resourcelist
-#Raw Food
-pushlist resourcelist 515|2422|2426|2489|2496|2515|2545|5639|5641|7708|7711|17617|17619
-#Leather
-pushlist resourcelist 4225
-#metal
-pushlist resourcelist 7154
-#wood
-pushlist resourcelist 7127
-#seeds
-pushlist resourcelist 22326
-
-
-removelist goldlist
-createlist goldlist
-
-#Checks
-pushlist goldlist 5360
-#Gold coins
-pushlist goldlist 3821
-#Doubloons
-pushlist goldlist 3891
-
-removelist taxlist
-createlist taxlist
-#bosstokens
-pushlist taxlist 17083
-pushlist taxlist 5192
-if taxRMs = 1
-    #research
-    pushlist taxlist 24434
-endif
-if taxMCDs = 1
-    #Mastercrafting Diagrams
-    pushlist taxlist 17087
-endif
-if taxPinkScrolls = 1
-    #arcane scrolls
-    pushlist taxlist 3827
-endif
-#essence
-pushlist taxlist 3901
-#masterychainlinks
-pushlist taxlist 43206
-
-removelist nondistrolist
-createlist nondistrolist
-foreach entry in resourcelist
-    pushlist nondistrolist entry
-endfor
-foreach entry in taxlist
-    pushlist nondistrolist entry
-endfor
-
-#shoes rare cloth
-#5899|5903|5905|5901
-
 dclick BDOPublicChest
 
-@setvar BDODistro BDODistroOne
+### MOVE LOOT ###
+# Every item type is taken from your backpack first, then from the CFC Public Chest.
 
-sysmsg "Dropping Rares into Distrochest" 14
-foreach itemtype in rarelist
+# Arcane runes from your backpack into the rune tome
+if BDORuneTome != 0 and findtype 'rune' backpack
+    overhead 'Putting away boss runes...' 44
+    menu BDORuneTome 0
+endif
+
+# Distro loot -> Distro One, switching to Distro Two when One is full
+@setvar BDODistro BDODistroOne
+sysmsg "Dropping distro loot into the distro" 14
+foreach itemtype in distroLootList
     while findtype itemtype backpack as item
         @clearsysmsg
         getlabel item lbl
@@ -405,10 +384,10 @@ foreach itemtype in rarelist
         wait 500
         if insysmsg "That container cannot hold more items."
             if BDODistro = BDODistroOne
-                sysmsg "Distro One full, switching to Distro two."
+                sysmsg "Distro One full, switching to Distro Two" 44
                 @setvar BDODistro BDODistroTwo
             elseif BDODistro = BDODistroTwo
-                overhead "All Distros full!"
+                overhead "All distros full!" 44
                 stop
             endif
         endif
@@ -423,16 +402,17 @@ foreach itemtype in rarelist
         wait 500
         if insysmsg "That container cannot hold more items."
             if BDODistro = BDODistroOne
-                sysmsg "Distro One full, switching to Distro two."
+                sysmsg "Distro One full, switching to Distro Two" 44
                 @setvar BDODistro BDODistroTwo
             elseif BDODistro = BDODistroTwo
-                overhead "All Distros full!"
+                overhead "All distros full!" 44
                 stop
             endif
         endif
     endwhile
 endfor
 
+# Shoes are cut into rare cloth (blessed shoes are skipped)
 if findtype 5899|5903|5905|5901 BDOPublicChest as myshoes
     getlabel myshoes lbl
     sysmsg "found shoes: {{lbl}}"
@@ -441,7 +421,6 @@ if findtype 5899|5903|5905|5901 BDOPublicChest as myshoes
     drop self -1 -1 -1
     wait 500
 endif
-
 while findtype 5899|5903|5905|5901 backpack as myshoes
     getlabel myshoes lbl
     sysmsg "found shoes: {{lbl}}"
@@ -459,7 +438,8 @@ while findtype 5899|5903|5905|5901 backpack as myshoes
     endif
 endwhile
 
-sysmsg "Dropping rare cloth and accessory dye into Distrochest" 14
+# Rare cloth and accessory dye -> distro, 6 at a time
+sysmsg "Dropping rare cloth and accessory dye into the distro" 14
 while findtype 5981|3843 backpack as item
     @clearsysmsg
     getlabel item lbl
@@ -470,10 +450,10 @@ while findtype 5981|3843 backpack as item
     wait 500
     if insysmsg "That container cannot hold more items."
         if BDODistro = BDODistroOne
-            sysmsg "Distro One full, switching to Distro two."
+            sysmsg "Distro One full, switching to Distro Two" 44
             @setvar BDODistro BDODistroTwo
         elseif BDODistro = BDODistroTwo
-            overhead "All Distros full!"
+            overhead "All distros full!" 44
             stop
         endif
     endif
@@ -488,19 +468,20 @@ while findtype 5981|3843 BDOPublicChest as item
     wait 500
     if insysmsg "That container cannot hold more items."
         if BDODistro = BDODistroOne
-            sysmsg "Distro One full, switching to Distro two."
+            sysmsg "Distro One full, switching to Distro Two" 44
             @setvar BDODistro BDODistroTwo
         elseif BDODistro = BDODistroTwo
-            overhead "All Distros full!"
+            overhead "All distros full!" 44
             stop
         endif
     endif
 endwhile
 
-sysmsg "Dropping Mini-Rares into Distro Two" 14
-foreach itemtype in minirarelist
+# Mini-rares -> Distro Two, as full stacks
+sysmsg "Dropping mini-rares into Distro Two" 14
+foreach itemtype in miniRareList
     if itemtype = 3827
-        //arcane scrolls, only the pink ones (hue 2609), moved as a full stack
+        # Arcane scrolls: only the pink ones (hue 2609)
         while findtype itemtype backpack 2609 as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
@@ -537,7 +518,9 @@ foreach itemtype in minirarelist
     endif
 endfor
 
-sysmsg "Dropping T8s in NCO main chest" 14
+# Legendary T8 maps (treasure map with hue 2091) -> NCO main.
+# This must run before the maps below, which take every treasure map.
+sysmsg "Dropping legendary T8 maps into NCO main" 14
 while findtype 5356 backpack 2091 as item
     getlabel item lbl
     sysmsg "{{item}} {{lbl}}" 818
@@ -555,90 +538,23 @@ while findtype 5356 BDOPublicChest 2091 as item
     wait 500
 endwhile
 
-removelist maphues
-createlist maphues
-#treasure 0
-pushlist maphues 0
-#lumber 2799
-pushlist maphues 2799
-#fishing 2904
-pushlist maphues 2904
-#mining 2796
-pushlist maphues 2796
-#skinning 2651
-pushlist maphues 2651
-#legendary 2091
-
-
-removelist maptypes
-createlist maptypes
-#fishing map
-pushlist maptypes 70148
-#lumber map
-pushlist maptypes 70151
-#ore map
-pushlist maptypes 70154
-#skinning map
-pushlist maptypes 70157
-#treasure map
-pushlist maptypes 5356
-
-sysmsg "Dropping maps in distro chest" 14
-foreach type in maptypes
-    while findtype type backpack as item
-        @clearsysmsg
-        getlabel item lbl
-        sysmsg "{{item}} {{lbl}}" 818
-        lift item 1
-        wait 200
-        drop BDODistro 10 10
-        wait 500
-        if insysmsg "That container cannot hold more items."
-            if BDODistro = BDODistroOne
-                sysmsg "Distro One full, switching to Distro two."
-                @setvar BDODistro BDODistroTwo
-            elseif BDODistro = BDODistroTwo
-                overhead "All Distros full!"
-                stop
-            endif
-        endif
-    endwhile
-    while findtype type BDOPublicChest as item
-        @clearsysmsg
-        getlabel item lbl
-        sysmsg "{{item}} {{lbl}}" 818
-        lift item 1
-        wait 200
-        drop BDODistro 10 10
-        wait 500
-        if insysmsg "That container cannot hold more items."
-            if BDODistro = BDODistroOne
-                sysmsg "Distro One full, switching to Distro two."
-                @setvar BDODistro BDODistroTwo
-            elseif BDODistro = BDODistroTwo
-                overhead "All Distros full!"
-                stop
-            endif
-        endif
-    endwhile
-endfor
-
-sysmsg "Dropping money into Distrochest" 14
-foreach itemtype in goldlist
+# Maps -> distro, one at a time
+sysmsg "Dropping maps into the distro" 14
+foreach itemtype in mapList
     while findtype itemtype backpack as item
         @clearsysmsg
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
-        lift item 60000
+        lift item 1
         wait 200
-        drop BDODistro -1 -1 -1
+        drop BDODistro 10 10
         wait 500
         if insysmsg "That container cannot hold more items."
             if BDODistro = BDODistroOne
-                sysmsg "Distro One full, switching to Distro two."
+                sysmsg "Distro One full, switching to Distro Two" 44
                 @setvar BDODistro BDODistroTwo
             elseif BDODistro = BDODistroTwo
-                overhead "All Distros full!"
+                overhead "All distros full!" 44
                 stop
             endif
         endif
@@ -647,24 +563,25 @@ foreach itemtype in goldlist
         @clearsysmsg
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
-        lift item 60000
+        lift item 1
         wait 200
-        drop BDODistro -1 -1 -1
+        drop BDODistro 10 10
         wait 500
         if insysmsg "That container cannot hold more items."
             if BDODistro = BDODistroOne
-                sysmsg "Distro One full, switching to Distro two."
+                sysmsg "Distro One full, switching to Distro Two" 44
                 @setvar BDODistro BDODistroTwo
             elseif BDODistro = BDODistroTwo
-                overhead "All Distros full!"
+                overhead "All distros full!" 44
                 stop
             endif
         endif
     endwhile
 endfor
 
-sysmsg "Dropping resources into NCO resources chest" 14
-foreach itemtype in resourcelist
+# Resources -> NCO resources
+sysmsg "Dropping resources into NCO resources" 14
+foreach itemtype in resourceList
     while findtype itemtype backpack as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
@@ -683,165 +600,188 @@ foreach itemtype in resourcelist
     endwhile
 endfor
 
-sysmsg "Moving boss tokens and tax items" 14
-foreach itemtype in taxlist
+# Boss tokens -> Boss tokens container, announced in chat.
+# The token's hue tells which dungeon it is from.
+sysmsg "Moving boss tokens" 14
+while findtype 17083 backpack as item
+    getlabel item lbl
+    sysmsg "{{item}} {{lbl}}" 818
+    if find item backpack 1779
+        say 'AEGIS KEEP MINI TOKEN SECURED!'
+    elseif find item backpack 2338
+        say "CAVERNAM MINI TOKEN SECURED!"
+    elseif find item backpack 2099
+        say "DARKMIRE MINI TOKEN SECURED!"
+    elseif find item backpack 1909
+        say "INFERNO MINI TOKEN SECURED!"
+    elseif find item backpack 2841
+        say "KRAUL HIVE MINI TOKEN SECURED!"
+    elseif find item backpack 2089
+        say "MOUNT PETRAM MINI TOKEN SECURED!"
+    elseif find item backpack 2796
+        say "NUSERO MINI TOKEN SECURED!"
+    elseif find item backpack 2091
+        say "OSSUARY MINI TOKEN SECURED!"
+    elseif find item backpack 2085
+        say "PULMA MINI TOKEN SECURED!"
+    elseif find item backpack 2093
+        say "SHADOWSPIRE MINI TOKEN SECURED!"
+    elseif find item backpack 2092
+        say "MAUSOLEUM MINI TOKEN SECURED!"
+    elseif find item backpack 1688
+        say "TIDAL TOMB MINI TOKEN SECURED!"
+    elseif find item backpack 1183
+        say "OCEAN MINI TOKEN SECURED!"
+    elseif find item backpack 1182
+        say "WILDERNESS MINI TOKEN SECURED!"
+    endif
+    lift item 60000
+    wait 200
+    drop BDOTokens -1 -1 -1
+    wait 500
+endwhile
+while findtype 5192 backpack as item
+    getlabel item lbl
+    sysmsg "{{item}} {{lbl}}" 818
+    if find item backpack 1779
+        say 'AEGIS KEEP MAIN TOKEN SECURED!'
+    elseif find item backpack 2338
+        say "CAVERNAM MAIN TOKEN SECURED!"
+    elseif find item backpack 2099
+        say "DARKMIRE MAIN TOKEN SECURED!"
+    elseif find item backpack 1909
+        say "INFERNO MAIN TOKEN SECURED!"
+    elseif find item backpack 2841
+        say "KRAUL HIVE MAIN TOKEN SECURED!"
+    elseif find item backpack 2089
+        say "MOUNT PETRAM MAIN TOKEN SECURED!"
+    elseif find item backpack 2796
+        say "NUSERO MAIN TOKEN SECURED!"
+    elseif find item backpack 2091
+        say "OSSUARY MAIN TOKEN SECURED!"
+    elseif find item backpack 2085
+        say "PULMA MAIN TOKEN SECURED!"
+    elseif find item backpack 2093
+        say "SHADOWSPIRE MAIN TOKEN SECURED!"
+    elseif find item backpack 2092
+        say "MAUSOLEUM MAIN TOKEN SECURED!"
+    elseif find item backpack 1688
+        say "TIDAL TOMB MAIN TOKEN SECURED!"
+    elseif find item backpack 1183
+        say "OCEAN MAIN TOKEN SECURED!"
+    elseif find item backpack 1182
+        say "WILDERNESS MAIN TOKEN SECURED!"
+    endif
+    lift item 60000
+    wait 200
+    drop BDOTokens -1 -1 -1
+    wait 500
+endwhile
+while findtype 17083 BDOPublicChest as item
+    getlabel item lbl
+    sysmsg "{{item}} {{lbl}}" 818
+    if find item BDOPublicChest 1779
+        say 'AEGIS KEEP MINI TOKEN SECURED!'
+    elseif find item BDOPublicChest 2338
+        say "CAVERNAM MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 2099
+        say "DARKMIRE MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 1909
+        say "INFERNO MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 2841
+        say "KRAUL HIVE MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 2089
+        say "MOUNT PETRAM MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 2796
+        say "NUSERO MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 2091
+        say "OSSUARY MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 2085
+        say "PULMA MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 2093
+        say "SHADOWSPIRE MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 2092
+        say "MAUSOLEUM MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 1688
+        say "TIDAL TOMB MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 1183
+        say "OCEAN MINI TOKEN SECURED!"
+    elseif find item BDOPublicChest 1182
+        say "WILDERNESS MINI TOKEN SECURED!"
+    endif
+    lift item 60000
+    wait 200
+    drop BDOTokens -1 -1 -1
+    wait 500
+endwhile
+while findtype 5192 BDOPublicChest as item
+    getlabel item lbl
+    sysmsg "{{item}} {{lbl}}" 818
+    if find item BDOPublicChest 1779
+        say 'AEGIS KEEP MAIN TOKEN SECURED!'
+    elseif find item BDOPublicChest 2338
+        say "CAVERNAM MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 2099
+        say "DARKMIRE MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 1909
+        say "INFERNO MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 2841
+        say "KRAUL HIVE MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 2089
+        say "MOUNT PETRAM MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 2796
+        say "NUSERO MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 2091
+        say "OSSUARY MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 2085
+        say "PULMA MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 2093
+        say "SHADOWSPIRE MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 2092
+        say "MAUSOLEUM MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 1688
+        say "TIDAL TOMB MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 1183
+        say "OCEAN MAIN TOKEN SECURED!"
+    elseif find item BDOPublicChest 1182
+        say "WILDERNESS MAIN TOKEN SECURED!"
+    endif
+    lift item 60000
+    wait 200
+    drop BDOTokens -1 -1 -1
+    wait 500
+endwhile
+
+# Tax items -> NCO main
+sysmsg "Moving tax items into NCO main" 14
+foreach itemtype in taxList
     while findtype itemtype backpack as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
-        if itemtype = 17083
-            if find item backpack 1779
-                say 'AEGIS KEEP MINI TOKEN SECURED!'
-            elseif find item backpack 2338
-                say "CAVERNAM MINI TOKEN SECURED!"
-            elseif find item backpack 2099
-                say "DARKMIRE MINI TOKEN SECURED!"
-            elseif find item backpack 1909
-                say "INFERNO MINI TOKEN SECURED!"
-            elseif find item backpack 2841
-                say "KRAUL HIVE MINI TOKEN SECURED!"
-            elseif find item backpack 2089
-                say "MOUNT PETRAM MINI TOKEN SECURED!"
-            elseif find item backpack 2796
-                say "NUSERO MINI TOKEN SECURED!"
-            elseif find item backpack 2091
-                say "OSSUARY MINI TOKEN SECURED!"
-            elseif find item backpack 2085
-                say "PULMA MINI TOKEN SECURED!"
-            elseif find item backpack 2093
-                say "SHADOWSPIRE MINI TOKEN SECURED!"
-            elseif find item backpack 2092
-                say "MAUSOLEUM MINI TOKEN SECURED!"
-            elseif find item backpack 1688
-                say "TIDAL TOMB MINI TOKEN SECURED!"
-            elseif find item backpack 1183
-                say "OCEAN MINI TOKEN SECURED!"
-            elseif find item backpack 1182
-                say "WILDERNESS MINI TOKEN SECURED!"
-            endif
-        endif
-        if itemtype = 5192
-            if find item backpack 1779
-                say 'AEGIS KEEP MAIN TOKEN SECURED!'
-            elseif find item backpack 2338
-                say "CAVERNAM MAIN TOKEN SECURED!"
-            elseif find item backpack 2099
-                say "DARKMIRE MAIN TOKEN SECURED!"
-            elseif find item backpack 1909
-                say "INFERNO MAIN TOKEN SECURED!"
-            elseif find item backpack 2841
-                say "KRAUL HIVE MAIN TOKEN SECURED!"
-            elseif find item backpack 2089
-                say "MOUNT PETRAM MAIN TOKEN SECURED!"
-            elseif find item backpack 2796
-                say "NUSERO MAIN TOKEN SECURED!"
-            elseif find item backpack 2091
-                say "OSSUARY MAIN TOKEN SECURED!"
-            elseif find item backpack 2085
-                say "PULMA MAIN TOKEN SECURED!"
-            elseif find item backpack 2093
-                say "SHADOWSPIRE MAIN TOKEN SECURED!"
-            elseif find item backpack 2092
-                say "MAUSOLEUM MAIN TOKEN SECURED!"
-            elseif find item backpack 1688
-                say "TIDAL TOMB MAIN TOKEN SECURED!"
-            elseif find item backpack 1183
-                say "OCEAN MAIN TOKEN SECURED!"
-            elseif find item backpack 1182
-                say "WILDERNESS MAIN TOKEN SECURED!"
-            endif
-        endif
         lift item 60000
         wait 200
-        if itemtype = 17083 or itemtype = 5192
-            drop BDOTokens -1 -1 -1
-        else
-            drop BDONCOmain -1 -1 -1
-        endif
+        drop BDONCOmain -1 -1 -1
         wait 500
     endwhile
     while findtype itemtype BDOPublicChest as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
-        if itemtype = 17083
-            if find item BDOPublicChest 1779
-                say 'AEGIS KEEP MINI TOKEN SECURED!'
-            elseif find item BDOPublicChest 2338
-                say "CAVERNAM MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 2099
-                say "DARKMIRE MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 1909
-                say "INFERNO MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 2841
-                say "KRAUL HIVE MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 2089
-                say "MOUNT PETRAM MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 2796
-                say "NUSERO MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 2091
-                say "OSSUARY MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 2085
-                say "PULMA MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 2093
-                say "SHADOWSPIRE MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 2092
-                say "MAUSOLEUM MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 1688
-                say "TIDAL TOMB MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 1183
-                say "OCEAN MINI TOKEN SECURED!"
-            elseif find item BDOPublicChest 1182
-                say "WILDERNESS MINI TOKEN SECURED!"
-            endif
-        endif
-        if itemtype = 5192
-            if find item BDOPublicChest 1779
-                say 'AEGIS KEEP MAIN TOKEN SECURED!'
-            elseif find item BDOPublicChest 2338
-                say "CAVERNAM MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 2099
-                say "DARKMIRE MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 1909
-                say "INFERNO MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 2841
-                say "KRAUL HIVE MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 2089
-                say "MOUNT PETRAM MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 2796
-                say "NUSERO MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 2091
-                say "OSSUARY MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 2085
-                say "PULMA MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 2093
-                say "SHADOWSPIRE MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 2092
-                say "MAUSOLEUM MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 1688
-                say "TIDAL TOMB MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 1183
-                say "OCEAN MAIN TOKEN SECURED!"
-            elseif find item BDOPublicChest 1182
-                say "WILDERNESS MAIN TOKEN SECURED!"
-            endif
-        endif
         lift item 60000
         wait 200
-        if itemtype = 17083 or itemtype = 5192
-            drop BDOTokens -1 -1 -1
-        else
-            drop BDONCOmain -1 -1 -1
-        endif
+        drop BDONCOmain -1 -1 -1
         wait 500
     endwhile
 endfor
 
 @clearignore
-
 overhead 'DROP OFF COMPLETE!' 14
 
+### VERIFY AND HAND OUT ###
+
 if verify = 1
-    sysmsg "Checking for non-distro items in Distros" 14
-    foreach itemtype in nondistrolist
+    # Move anything that must not be handed out back out of the distros
+    sysmsg "Checking the distros for items that must not be handed out" 14
+    foreach itemtype in nonDistroList
         while findtype itemtype BDODistroOne as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
@@ -869,7 +809,6 @@ if verify = 1
             @ignore item
         endwhile
     endfor
-    sysmsg "Checking for T8s in Distros" 14
     while findtype 5356 BDODistroOne 2091 as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
@@ -888,8 +827,9 @@ if verify = 1
         wait 500
         @ignore item
     endwhile
-    sysmsg "Check Complete" 14
-    #take runes out of the CFC Public Chest
+    sysmsg "Check complete" 14
+
+    # Arcane runes: out of the CFC Public Chest into your backpack, then into the rune tome
     while findtype 39889|39891|39892|39896|39897|39898|39905|39909|39911|39912|39916|39917|39918 BDOPublicChest as myrune
         lift myrune 10
         if findtype 3702 backpack as mybag
@@ -902,12 +842,12 @@ if verify = 1
     if BDORuneTome != 0
         menu BDORuneTome 0
     endif
+
+    # Hand out the loot once the CFC Public Chest is empty, otherwise start over
     getlabel BDOPublicChest lbl
     if "(0 items" in lbl
-        #ok
         say '[bossresults'
         waitforgump 1892293155
-        #open Distro One so you can hand out the loot from Distro One and Two
         dclick BDODistroOne
         waitforgump 2865667423
     else
