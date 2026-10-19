@@ -1,8 +1,10 @@
 ###########################################################################
 # CFC BOSS LOOT DROP-OFF
+# Author: Dessan
+# Version: 1.0, updated 2026-10-20
 # Empties your backpack and the CFC Public Chest into the guild distros and
 # storage, then starts [bossresults and opens Distro One for you to hand out.
-# Based on Stephanius' YEW boss loot drop-off (adapted from Templer's script).
+# Based on the YEW boss loot drop-off by Stephanius, adapted from a script by Templer.
 #
 # Where the loot goes:
 #   rares, rare cloth, maps, gold  -> Distro One (Distro Two when One is full)
@@ -24,7 +26,7 @@
 
 # Distro One: main boss loot. Opened at the end so you can hand it out.
 @setvar! CFC_DistroOne 0x4630999E
-# Distro Two: mini-rares, and Distro One's loot when One is full.
+# Distro Two: mini-rares, and the loot for Distro One when One is full.
 @setvar! CFC_DistroTwo 0x40FD50C6
 # CFC Public Chest: members drop their boss loot here. The script empties it.
 @setvar! CFC_PublicChest 0x583561C4
@@ -61,7 +63,7 @@
 # 1 = tax research materials, 0 = hand them out (Distro One)
 @setvar! taxRMs 0
 
-sysmsg 'BOSS LOOT DROP-OFF started' 44
+sysmsg 'CFC BOSS LOOT DROP-OFF v1.0 started' 44
 if testAnnounce = 1
     say 'Testing drop off script, please use bottom distro if needed'
 endif
@@ -601,7 +603,7 @@ foreach itemtype in resourceList
 endfor
 
 # Boss tokens -> Boss tokens container, announced in chat.
-# The token's hue tells which dungeon it is from.
+# The hue of the token tells which dungeon it is from.
 sysmsg "Moving boss tokens" 14
 while findtype 17083 backpack as item
     getlabel item lbl
