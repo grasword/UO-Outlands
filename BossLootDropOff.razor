@@ -53,9 +53,13 @@
 # Gets boss tokens (main and mini, announced in chat), arcane essence, mastery chain links,
 # legendary T8 treasure maps (hue 2091), MCDs/RMs/arcane scrolls when taxed,
 # and any resources/tax items found in the distros by the verify step.
-# If storeArcaneRunes = 1 it must also contain the arcane rune tome (a book with hue 2085). Update the tome
-# It must also contain the NCO resources and mini-loot chests below.
+# It must also contain the NCO resources and mini-loot chests below,
+# and the arcane rune tome if storeArcaneRunes = 1.
 @setvar! CFG_NCOmain 0x4F59860E
+# --- ARCANE RUNE TOME: INSIDE NCO main, only used when storeArcaneRunes = 1 ---
+# Boss runes from your backpack and the CFC Public Chest are added to it.
+# Set to 0 to search NCO main for a rune tome (item 70158, hue 2085) instead.
+@setvar! CFG_RuneTome 0x42CBB047
 # --- NCO RESOURCES: chest INSIDE NCO main ---
 # Gets raw food, leather, ingots, boards and seeds.
 @setvar! CFG_NCOresources 0x4871BAC2
@@ -212,19 +216,27 @@ elseif not varexist BDONCOmain or not find BDONCOmain ground -1 -1 2
     endif
 endif
 
-# Arcane Runes to the Rune Tome in NCO main chest
-if storeArcaneRunes = 1 and find BDONCOmain ground any any 2 and findtype 'rune' backpack
-    if findtype 'book' BDONCOmain 2085 as 'arcanerunetome'
-        overhead 'Putting away boss runes...' 44
-        menu 'arcanerunetome' 0
+#open NCO main so the chests and the rune tome inside it can be found
+dclick BDONCOmain
+wait 500
+
+#Arcane rune tome
+@setvar! BDORuneTome 0
+if storeArcaneRunes = 1
+    if CFG_RuneTome != 0 and find CFG_RuneTome BDONCOmain
+        @setvar! BDORuneTome CFG_RuneTome
+    elseif findtype 70158 BDONCOmain 2085 as runetome
+        @setvar! BDORuneTome runetome
     else
-        overhead 'ARCANE RUNE TOME NOT FOUND' 14
+        overhead 'ARCANE RUNE TOME NOT FOUND' 44
     endif
 endif
 
-#open NCO main so the resource and mini-loot chests inside it can be found
-dclick BDONCOmain
-wait 500
+# Arcane Runes to the Rune Tome in NCO main chest
+if BDORuneTome != 0 and findtype 'rune' backpack
+    overhead 'Putting away boss runes...' 44
+    menu BDORuneTome 0
+endif
 
 #NCO resources chest
 if CFG_NCOresources != 0 and find CFG_NCOresources BDONCOmain
@@ -908,13 +920,8 @@ if verify = 1
         endif
         @ignore myrune
     endwhile
-    if storeArcaneRunes = 1
-        if find BDONCOmain ground -1 -1 2 as Box
-            dclick Box
-            if findtype 70158 BDONCOmain 2085 1 2 as tomearcane
-                menu tomearcane 0
-            endif
-        endif
+    if BDORuneTome != 0
+        menu BDORuneTome 0
     endif
     getlabel BDOPublicChest lbl
     if "(0 items" in lbl
