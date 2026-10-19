@@ -53,24 +53,24 @@
 # Anyone in the group should be able to drop into it. The script empties it completely;
 # arcane runes are taken out into your backpack. The final distribution only starts when
 # the Inbox shows "(0 items", otherwise the script starts over.
-@setvar! CFG_Inbox 0x403434FC
+@setvar! CFG_Inbox 0x583561C4
 # --- NCO TOP: secure guild storage for things that are NOT distributed ---
 # Gets boss tokens (main and mini, announced in chat), arcane essence, mastery chain links,
 # legendary T8 treasure maps (hue 2091), MCDs/RMs/arcane scrolls when taxed,
 # and any resources/tax items found in the distros by the verify step.
-# If storeArcaneRunes = 1 it must also contain the arcane rune tome (a book with hue 2085).
-@setvar! CFG_NCOtop 0x43CA920D
+# If storeArcaneRunes = 1 it must also contain the arcane rune tome (a book with hue 2085). Update the tome
+@setvar! CFG_NCOtop 0x4F59860E
 # --- NCO BOTTOM: secure chest that only holds the two sub-chests below ---
 # Nothing is dropped into it directly, it is opened so the chests inside can be reached.
-@setvar! CFG_NCObottom 0x43C4ABD0
+@setvar! CFG_NCObottom 0x4F59860E // same chest
 # --- RESOURCES: chest INSIDE NCO bottom ---
 # Gets raw food, leather, ingots, boards and seeds.
-@setvar! CFG_NCObottomResources 0x5E53E7D5
+@setvar! CFG_NCObottomResources 0x4871BAC2
 # --- MINI-LOOT: chest INSIDE NCO bottom, a stash of mini-rares ---
 # This script never puts anything in it. It is only used by the SPLIT step: when split = 1
 # and the toggle script set BDOsplit = 1, mini-rares from here are moved into the first
 # EMPTY distro so they can be split between players.
-@setvar! CFG_NCObottomMini 0x52B369CF
+@setvar! CFG_NCObottomMini 0x52B369CF // no such chest yet.
 
 ### OPTIONS ###
 # If you want to drop off Arcane Runes, set to 1.
