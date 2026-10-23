@@ -26,30 +26,40 @@
 
 # Distro One: main boss loot. Opened at the end so you can hand it out.
 @setvar! CFC_DistroOne 0x4630999E
+
 # Distro Two: mini-rares, and the loot for Distro One when One is full.
 @setvar! CFC_DistroTwo 0x40FD50C6
+
 # CFC Public Chest: members drop their boss loot here. The script empties it.
 @setvar! CFC_PublicChest 0x583561C4
+
 # NCO main: guild storage for tax items and legendary T8 maps.
 # The NCO resources chest and the rune tome must be inside it.
 @setvar! CFC_NCOmain 0x4F59860E
+
 # NCO resources: inside NCO main, gets raw food, leather, ingots, boards and seeds.
 @setvar! CFC_NCOresources 0x4871BAC2
+
 # Rune tome: inside NCO main. 0 = look for a rune tome with hue 2085.
 @setvar! CFC_RuneTome 0x42CBB047
+
 # Boss tokens: inside NCO main or within 2 tiles. 0 = tokens go to NCO main.
 @setvar! CFC_Tokens 0x42244475
 
 ### OPTIONS ###
 # 1 = put arcane runes into the rune tome
 @setvar! storeArcaneRunes 0
+
 # 1 = empty the recycler when it is full
 @setvar! autoRecycle 1
+
 # 1 = at the end: move tax items and resources out of the distros, take runes
 #     out of the CFC Public Chest and start [bossresults
 @setvar! verify 1
+
 # 1 = treat leather as distro loot (for testing)
 @setvar! debug 0
+
 # 1 = your character warns in chat that the script is being tested (temporary)
 @setvar! testAnnounce 1
 
@@ -58,8 +68,10 @@
 # Arcane essence and mastery chain links are always taxed (see taxList).
 # 1 = tax master crafting diagrams, 0 = hand them out (Distro One)
 @setvar! taxMCDs 0
+
 # 1 = tax pink arcane scrolls, 0 = hand them out (Distro Two)
 @setvar! taxPinkScrolls 0
+
 # 1 = tax research materials, 0 = hand them out (Distro One)
 @setvar! taxRMs 0
 
@@ -73,120 +85,90 @@ endif
 # Distro loot: goes to Distro One (Distro Two when One is full)
 removelist distroLootList
 createlist distroLootList
-# Aspect cores
-pushlist distroLootList 3985|4025
-# Aspect distillations
-pushlist distroLootList 17686|4026
-# Skill orbs
-pushlist distroLootList 22336
-# Skill scrolls
-pushlist distroLootList 8826
-# Survival gear
-pushlist distroLootList 37181
-# Master crafting diagrams
+pushlist distroLootList 3985|4025 //aspect-cores
+pushlist distroLootList 17686|4026 //aspect-distillations
+pushlist distroLootList 22336 //skill-orbs
+pushlist distroLootList 8826 //skill-scrolls
+pushlist distroLootList 37181 //survival-gear
+
 if taxMCDs = 0
-    pushlist distroLootList 17087
+    pushlist distroLootList 17087 //master-crafting-diagrams
 endif
-# Research materials
+
 if taxRMs = 0
-    pushlist distroLootList 24434
+    pushlist distroLootList 24434 //research-materials
 endif
-# Spell hue deeds
-pushlist distroLootList 11858
-# Dungeon seeds
-pushlist distroLootList 51098
-# Furniture dye
-pushlist distroLootList 29025
-# Mastery chain dye
-pushlist distroLootList 29034
-# Headwear dye
-pushlist distroLootList 3842
-# Runebook dye
-pushlist distroLootList 3838
-# Backpack dye
-pushlist distroLootList 3839
-# Carpet tiles
-pushlist distroLootList 48407|4248|43165|43166
-# Checks
-pushlist distroLootList 5360
-# Gold coins
-pushlist distroLootList 3821
-# Doubloons
-pushlist distroLootList 3891
+
+pushlist distroLootList 11858 //spell-hue-deeds
+pushlist distroLootList 51098 //dungeon-seeds
+pushlist distroLootList 29025 //furniture-dye
+pushlist distroLootList 29034 //mastery-chain-dye
+pushlist distroLootList 3842 //headwear-dye
+pushlist distroLootList 3838 //runebook-dye
+pushlist distroLootList 3839 //backpack-dye
+pushlist distroLootList 48407|4248|43165|43166 //carpet-tiles
+pushlist distroLootList 5360 //checks
+pushlist distroLootList 3821 //gold-coins
+pushlist distroLootList 3891 //doubloons
+
 if debug = 1
-    # Leather, for testing
-    pushlist distroLootList 4225
+    pushlist distroLootList 4225 //leather-for-testing
 endif
 
 # Mini-rares: go to Distro Two
 removelist miniRareList
 createlist miniRareList
-# Arcane scrolls (only the pink ones, hue 2609)
+
 if taxPinkScrolls = 0
-    pushlist miniRareList 3827
+    pushlist miniRareList 3827 //arcane-scrolls-pink-hue-2609
 endif
-# Plant chemicals
-pushlist miniRareList 29030
-# Phylacteries
-pushlist miniRareList 576
-# Carpet dye
-pushlist miniRareList 29036
-# Melloweed leaves
-pushlist miniRareList 51094
-# Mount gear dye
-pushlist miniRareList 15296
+
+pushlist miniRareList 29030 //plant-chemicals
+pushlist miniRareList 576 //phylacteries
+pushlist miniRareList 29036 //carpet-dye
+pushlist miniRareList 51094 //melloweed-leaves
+pushlist miniRareList 15296 //mount-gear-dye
 
 # Maps: go to the distro one at a time (legendary T8 maps are moved to NCO main first)
 removelist mapList
 createlist mapList
-# Fishing map
-pushlist mapList 70148
-# Lumber map
-pushlist mapList 70151
-# Ore map
-pushlist mapList 70154
-# Skinning map
-pushlist mapList 70157
-# Treasure map
-pushlist mapList 5356
+pushlist mapList 70148 //fishing-map
+pushlist mapList 70151 //lumber-map
+pushlist mapList 70154 //ore-map
+pushlist mapList 70157 //skinning-map
+pushlist mapList 5356 //treasure-map
 
 # Resources: go to NCO resources
 removelist resourceList
 createlist resourceList
-# Raw food
-pushlist resourceList 515|2422|2426|2489|2496|2515|2545|5639|5641|7708|7711|17617|17619
-# Leather
-pushlist resourceList 4225
-# Ingots
-pushlist resourceList 7154
-# Boards
-pushlist resourceList 7127
-# Seeds
-pushlist resourceList 22326
+pushlist resourceList 515|2422|2426|2489|2496|2515|2545|5639|5641|7708|7711|17617|17619 //raw-food
+pushlist resourceList 4225 //leather
+pushlist resourceList 7154 //ingots
+pushlist resourceList 7127 //boards
+pushlist resourceList 22326 //seeds
 
 # Boss tokens: go to the Boss tokens container
 removelist tokenList
 createlist tokenList
-# Mini boss token
-pushlist tokenList 17083
-# Main boss token
-pushlist tokenList 5192
+pushlist tokenList 17083 //mini-boss-token
+pushlist tokenList 5192 //main-boss-token
 
 # Tax items: go to NCO main
 removelist taxList
 createlist taxList
-# Arcane essence
-pushlist taxList 3901
-# Mastery chain links
-pushlist taxList 43206
+pushlist taxList 3901 //arcane-essence
+pushlist taxList 43206 //mastery-chain-links
+
 if taxMCDs = 1
-    pushlist taxList 17087
+    pushlist taxList 17087 //master-crafting-diagrams
 endif
+
 if taxRMs = 1
-    pushlist taxList 24434
+    pushlist taxList 24434 //research-materials
 endif
+
 if taxPinkScrolls = 1
-    pushlist taxList 3827
+    pushlist taxList 3827 //arcane-scrolls-pink
 endif
 
 # Everything that must never stay in a distro (checked by the verify step)
@@ -195,9 +177,11 @@ createlist nonDistroList
 foreach entry in resourceList
     pushlist nonDistroList entry
 endfor
+
 foreach entry in tokenList
     pushlist nonDistroList entry
 endfor
+
 foreach entry in taxList
     pushlist nonDistroList entry
 endfor
@@ -248,6 +232,7 @@ elseif not varexist BDODistroOne or not find BDODistroOne ground -1 -1 2
     while targetexists
         wait 100
     endwhile
+
     getlabel BDODistroOne lbl
     if find BDODistroOne ground any any 2 and 'distribution chest' in lbl
         wait 500
@@ -271,6 +256,7 @@ elseif not varexist BDODistroTwo or not find BDODistroTwo ground -1 -1 2
     while targetexists
         wait 100
     endwhile
+
     getlabel BDODistroTwo lbl
     if find BDODistroTwo ground any any 2 and 'distribution chest' in lbl
         wait 500
@@ -294,6 +280,7 @@ elseif not varexist BDOPublicChest or not find BDOPublicChest ground -1 -1 2
     while targetexists
         wait 100
     endwhile
+
     if find BDOPublicChest ground any any 2
         overhead 'CFC Public Chest set!' 14
         dclick BDOPublicChest
@@ -315,6 +302,7 @@ elseif not varexist BDONCOmain or not find BDONCOmain ground -1 -1 2
     while targetexists
         wait 100
     endwhile
+
     if find BDONCOmain ground any any 2
         overhead 'NCO main chest set!' 14
         dclick BDONCOmain
@@ -394,6 +382,7 @@ foreach itemtype in distroLootList
             endif
         endif
     endwhile
+
     while findtype itemtype BDOPublicChest as item
         @clearsysmsg
         getlabel item lbl
@@ -423,6 +412,7 @@ if findtype 5899|5903|5905|5901 BDOPublicChest as myshoes
     drop self -1 -1 -1
     wait 500
 endif
+
 while findtype 5899|5903|5905|5901 backpack as myshoes
     getlabel myshoes lbl
     sysmsg "found shoes: {{lbl}}"
@@ -460,6 +450,7 @@ while findtype 5981|3843 backpack as item
         endif
     endif
 endwhile
+
 while findtype 5981|3843 BDOPublicChest as item
     @clearsysmsg
     getlabel item lbl
@@ -492,6 +483,7 @@ foreach itemtype in miniRareList
             drop BDODistroTwo -1 -1 -1
             wait 500
         endwhile
+
         while findtype itemtype BDOPublicChest 2609 as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
@@ -509,6 +501,7 @@ foreach itemtype in miniRareList
             drop BDODistroTwo -1 -1 -1
             wait 500
         endwhile
+
         while findtype itemtype BDOPublicChest as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
@@ -531,6 +524,7 @@ while findtype 5356 backpack 2091 as item
     drop BDONCOmain -1 -1 -1
     wait 500
 endwhile
+
 while findtype 5356 BDOPublicChest 2091 as item
     getlabel item lbl
     sysmsg "{{item}} {{lbl}}" 818
@@ -561,6 +555,7 @@ foreach itemtype in mapList
             endif
         endif
     endwhile
+
     while findtype itemtype BDOPublicChest as item
         @clearsysmsg
         getlabel item lbl
@@ -592,6 +587,7 @@ foreach itemtype in resourceList
         drop BDONCOresources -1 -1 -1
         wait 500
     endwhile
+
     while findtype itemtype BDOPublicChest as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
@@ -642,6 +638,7 @@ while findtype 17083 backpack as item
     drop BDOTokens -1 -1 -1
     wait 500
 endwhile
+
 while findtype 5192 backpack as item
     getlabel item lbl
     sysmsg "{{item}} {{lbl}}" 818
@@ -679,6 +676,7 @@ while findtype 5192 backpack as item
     drop BDOTokens -1 -1 -1
     wait 500
 endwhile
+
 while findtype 17083 BDOPublicChest as item
     getlabel item lbl
     sysmsg "{{item}} {{lbl}}" 818
@@ -716,6 +714,7 @@ while findtype 17083 BDOPublicChest as item
     drop BDOTokens -1 -1 -1
     wait 500
 endwhile
+
 while findtype 5192 BDOPublicChest as item
     getlabel item lbl
     sysmsg "{{item}} {{lbl}}" 818
@@ -765,6 +764,7 @@ foreach itemtype in taxList
         drop BDONCOmain -1 -1 -1
         wait 500
     endwhile
+
     while findtype itemtype BDOPublicChest as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
@@ -797,6 +797,7 @@ if verify = 1
             wait 500
             @ignore item
         endwhile
+
         while findtype itemtype BDODistroTwo as item
             getlabel item lbl
             sysmsg "{{item}} {{lbl}}" 818
@@ -811,6 +812,7 @@ if verify = 1
             @ignore item
         endwhile
     endfor
+
     while findtype 5356 BDODistroOne 2091 as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
@@ -820,6 +822,7 @@ if verify = 1
         wait 500
         @ignore item
     endwhile
+
     while findtype 5356 BDODistroTwo 2091 as item
         getlabel item lbl
         sysmsg "{{item}} {{lbl}}" 818
@@ -829,6 +832,7 @@ if verify = 1
         wait 500
         @ignore item
     endwhile
+
     sysmsg "Check complete" 14
 
     # Arcane runes: out of the CFC Public Chest into your backpack, then into the rune tome
@@ -841,6 +845,7 @@ if verify = 1
         endif
         @ignore myrune
     endwhile
+
     if BDORuneTome != 0
         menu BDORuneTome 0
     endif
