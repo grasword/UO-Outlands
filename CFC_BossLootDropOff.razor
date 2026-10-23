@@ -60,9 +60,6 @@
 # 1 = treat leather as distro loot (for testing)
 @setvar! debug 0
 
-# 1 = your character warns in chat that the script is being tested (temporary)
-@setvar! testAnnounce 1
-
 ### TAX ###
 # Tax items are kept by the guild in NCO main instead of being handed out.
 # Arcane essence and mastery chain links are always taxed (see taxList).
@@ -76,9 +73,6 @@
 @setvar! taxRMs 0
 
 sysmsg 'CFC BOSS LOOT DROP-OFF v1.0 started' 44
-if testAnnounce = 1
-    say 'Testing drop off script, please use bottom distro if needed'
-endif
 
 ### ITEM LISTS ###
 
